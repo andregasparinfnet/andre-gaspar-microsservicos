@@ -1,8 +1,8 @@
-package br.edu.infnet.andre_gaspar_api.controller;
+package br.edu.infnet.andre_gaspar_api.atividade;
 
 import br.edu.infnet.andre_gaspar_api.exception.DadosInvalidosException;
-import br.edu.infnet.andre_gaspar_api.model.AtividadePericial;
-import br.edu.infnet.andre_gaspar_api.service.AtividadePericialService;
+import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericial;
+import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericialService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

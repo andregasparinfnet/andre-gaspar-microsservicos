@@ -1,7 +1,7 @@
-package br.edu.infnet.andre_gaspar_api.repository;
+package br.edu.infnet.andre_gaspar_api.nomeacao;
 
-import br.edu.infnet.andre_gaspar_api.enums.StatusNomeacao;
-import br.edu.infnet.andre_gaspar_api.model.NomeacaoPericial;
+import br.edu.infnet.andre_gaspar_api.nomeacao.StatusNomeacao;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

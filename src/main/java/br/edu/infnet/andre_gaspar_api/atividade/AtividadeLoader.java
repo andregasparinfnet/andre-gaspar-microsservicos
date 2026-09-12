@@ -1,8 +1,9 @@
-package br.edu.infnet.andre_gaspar_api.loader;
+package br.edu.infnet.andre_gaspar_api.atividade;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoLoader;
 
-import br.edu.infnet.andre_gaspar_api.model.AtividadePericial;
-import br.edu.infnet.andre_gaspar_api.model.NomeacaoPericial;
-import br.edu.infnet.andre_gaspar_api.service.AtividadePericialService;
+import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericial;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
+import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericialService;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.BufferedReader;

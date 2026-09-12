@@ -1,6 +1,5 @@
-package br.edu.infnet.andre_gaspar_api.repository;
+package br.edu.infnet.andre_gaspar_api.perito;
 
-import br.edu.infnet.andre_gaspar_api.model.Perito;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PeritoRepository extends JpaRepository<Perito, Long> {

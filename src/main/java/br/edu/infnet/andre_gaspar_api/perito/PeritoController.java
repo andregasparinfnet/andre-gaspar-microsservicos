@@ -1,8 +1,6 @@
-package br.edu.infnet.andre_gaspar_api.controller;
+package br.edu.infnet.andre_gaspar_api.perito;
 
 import br.edu.infnet.andre_gaspar_api.exception.DadosInvalidosException;
-import br.edu.infnet.andre_gaspar_api.model.Perito;
-import br.edu.infnet.andre_gaspar_api.service.PeritoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

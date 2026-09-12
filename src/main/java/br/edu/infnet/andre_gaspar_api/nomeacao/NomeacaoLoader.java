@@ -1,11 +1,12 @@
-package br.edu.infnet.andre_gaspar_api.loader;
+package br.edu.infnet.andre_gaspar_api.nomeacao;
 
-import br.edu.infnet.andre_gaspar_api.enums.StatusNomeacao;
+import br.edu.infnet.andre_gaspar_api.nomeacao.StatusNomeacao;
 import br.edu.infnet.andre_gaspar_api.exception.DadosInvalidosException;
-import br.edu.infnet.andre_gaspar_api.model.HonorariosPericiais;
-import br.edu.infnet.andre_gaspar_api.model.NomeacaoPericial;
-import br.edu.infnet.andre_gaspar_api.model.Perito;
-import br.edu.infnet.andre_gaspar_api.service.NomeacaoPericialService;
+import br.edu.infnet.andre_gaspar_api.nomeacao.HonorariosPericiais;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
+import br.edu.infnet.andre_gaspar_api.perito.Perito;
+import br.edu.infnet.andre_gaspar_api.perito.PeritoLoader;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericialService;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.BufferedReader;

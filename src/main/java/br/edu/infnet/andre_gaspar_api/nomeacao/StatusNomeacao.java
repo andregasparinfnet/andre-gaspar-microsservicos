@@ -1,4 +1,4 @@
-package br.edu.infnet.andre_gaspar_api.enums;
+package br.edu.infnet.andre_gaspar_api.nomeacao;
 
 public enum StatusNomeacao {
     RECEBIDA,

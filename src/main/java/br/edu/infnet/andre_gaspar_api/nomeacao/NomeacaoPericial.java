@@ -1,6 +1,9 @@
-package br.edu.infnet.andre_gaspar_api.model;
+package br.edu.infnet.andre_gaspar_api.nomeacao;
+import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericial;
+import br.edu.infnet.andre_gaspar_api.model.Identificavel;
 
-import br.edu.infnet.andre_gaspar_api.enums.StatusNomeacao;
+import br.edu.infnet.andre_gaspar_api.nomeacao.StatusNomeacao;
+import br.edu.infnet.andre_gaspar_api.perito.Perito;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CascadeType;

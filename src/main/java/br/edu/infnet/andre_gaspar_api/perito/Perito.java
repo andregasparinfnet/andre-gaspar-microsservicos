@@ -1,5 +1,6 @@
-package br.edu.infnet.andre_gaspar_api.model;
+package br.edu.infnet.andre_gaspar_api.perito;
 
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;

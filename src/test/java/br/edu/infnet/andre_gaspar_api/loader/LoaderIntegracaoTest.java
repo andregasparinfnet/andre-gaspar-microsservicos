@@ -1,11 +1,11 @@
 package br.edu.infnet.andre_gaspar_api.loader;
 
-import br.edu.infnet.andre_gaspar_api.model.AtividadePericial;
-import br.edu.infnet.andre_gaspar_api.model.NomeacaoPericial;
-import br.edu.infnet.andre_gaspar_api.model.Perito;
-import br.edu.infnet.andre_gaspar_api.service.AtividadePericialService;
-import br.edu.infnet.andre_gaspar_api.service.NomeacaoPericialService;
-import br.edu.infnet.andre_gaspar_api.service.PeritoService;
+import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericial;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
+import br.edu.infnet.andre_gaspar_api.perito.Perito;
+import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericialService;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericialService;
+import br.edu.infnet.andre_gaspar_api.perito.PeritoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

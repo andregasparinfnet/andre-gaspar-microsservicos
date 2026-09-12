@@ -1,9 +1,11 @@
-package br.edu.infnet.andre_gaspar_api.service;
+package br.edu.infnet.andre_gaspar_api.atividade;
+import br.edu.infnet.andre_gaspar_api.service.BaseCrudService;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericialService;
 
 import br.edu.infnet.andre_gaspar_api.exception.DadosInvalidosException;
-import br.edu.infnet.andre_gaspar_api.model.AtividadePericial;
-import br.edu.infnet.andre_gaspar_api.model.NomeacaoPericial;
-import br.edu.infnet.andre_gaspar_api.repository.AtividadePericialRepository;
+import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericial;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
+import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericialRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

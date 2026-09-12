@@ -1,4 +1,4 @@
-package br.edu.infnet.andre_gaspar_api.model;
+package br.edu.infnet.andre_gaspar_api.nomeacao;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

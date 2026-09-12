@@ -1,15 +1,15 @@
 package br.edu.infnet.andre_gaspar_api.bootstrap;
 
-import br.edu.infnet.andre_gaspar_api.enums.StatusNomeacao;
-import br.edu.infnet.andre_gaspar_api.loader.AtividadeLoader;
-import br.edu.infnet.andre_gaspar_api.loader.NomeacaoLoader;
-import br.edu.infnet.andre_gaspar_api.loader.PeritoLoader;
-import br.edu.infnet.andre_gaspar_api.model.AtividadePericial;
-import br.edu.infnet.andre_gaspar_api.model.NomeacaoPericial;
-import br.edu.infnet.andre_gaspar_api.model.Perito;
-import br.edu.infnet.andre_gaspar_api.service.AtividadePericialService;
-import br.edu.infnet.andre_gaspar_api.service.NomeacaoPericialService;
-import br.edu.infnet.andre_gaspar_api.service.PeritoService;
+import br.edu.infnet.andre_gaspar_api.nomeacao.StatusNomeacao;
+import br.edu.infnet.andre_gaspar_api.atividade.AtividadeLoader;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoLoader;
+import br.edu.infnet.andre_gaspar_api.perito.PeritoLoader;
+import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericial;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
+import br.edu.infnet.andre_gaspar_api.perito.Perito;
+import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericialService;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericialService;
+import br.edu.infnet.andre_gaspar_api.perito.PeritoService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

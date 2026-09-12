@@ -1,4 +1,6 @@
-package br.edu.infnet.andre_gaspar_api.model;
+package br.edu.infnet.andre_gaspar_api.atividade;
+import br.edu.infnet.andre_gaspar_api.model.Identificavel;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;

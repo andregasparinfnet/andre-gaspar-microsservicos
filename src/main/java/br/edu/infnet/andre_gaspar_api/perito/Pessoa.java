@@ -1,5 +1,6 @@
-package br.edu.infnet.andre_gaspar_api.model;
+package br.edu.infnet.andre_gaspar_api.perito;
 
+import br.edu.infnet.andre_gaspar_api.model.Identificavel;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

@@ -1,12 +1,14 @@
-package br.edu.infnet.andre_gaspar_api.service;
+package br.edu.infnet.andre_gaspar_api.nomeacao;
+import br.edu.infnet.andre_gaspar_api.service.BaseCrudService;
 
-import br.edu.infnet.andre_gaspar_api.enums.StatusNomeacao;
+import br.edu.infnet.andre_gaspar_api.nomeacao.StatusNomeacao;
 import br.edu.infnet.andre_gaspar_api.exception.DadosInvalidosException;
 import br.edu.infnet.andre_gaspar_api.exception.EntidadeJaExistenteException;
 import br.edu.infnet.andre_gaspar_api.exception.EntidadeNaoEncontradaException;
-import br.edu.infnet.andre_gaspar_api.model.NomeacaoPericial;
-import br.edu.infnet.andre_gaspar_api.model.Perito;
-import br.edu.infnet.andre_gaspar_api.repository.NomeacaoPericialRepository;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
+import br.edu.infnet.andre_gaspar_api.perito.Perito;
+import br.edu.infnet.andre_gaspar_api.perito.PeritoService;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericialRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
