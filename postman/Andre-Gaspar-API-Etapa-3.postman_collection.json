@@ -1,0 +1,537 @@
+{
+  "info": {
+    "_postman_id": "2da92db1-6313-43ef-b7fb-c65aa6774aff",
+    "name": "André Gaspar API - Etapa 3",
+    "description": "Coleção de requisições para demonstrar e testar os endpoints REST da Etapa 3 do projeto André Gaspar API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "45344477",
+    "_collection_link": "https://go.postman.co/collection/45344477-2da92db1-6313-43ef-b7fb-c65aa6774aff?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Peritos",
+      "item": [
+        {
+          "name": "Listar todos os peritos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Resposta no formato JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Lista contém ao menos um perito\", function () {\r",
+                  "    const resposta = pm.response.json();\r",
+                  "    pm.expect(resposta).to.be.an(\"array\").that.is.not.empty;\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/peritos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "peritos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obter perito por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Resposta no formato JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Retornou o perito solicitado\", function () {\r",
+                  "    const perito = pm.response.json();\r",
+                  "    pm.expect(perito.id).to.equal(1);\r",
+                  "    pm.expect(perito.nome).to.equal(\"Perito Academico\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/peritos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "peritos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Nomeações",
+      "item": [
+        {
+          "name": "Listar todas as nomeações",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Resposta no formato JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Lista contém as nomeações carregadas\", function () {\r",
+                  "    const resposta = pm.response.json();\r",
+                  "    pm.expect(resposta).to.be.an(\"array\");\r",
+                  "    pm.expect(resposta.length).to.be.at.least(2);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/nomeacoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "nomeacoes"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Atividades",
+      "item": [
+        {
+          "name": "Listar todas as atividades",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Resposta no formato JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Lista contém as atividades carregadas\", function () {\r",
+                  "    const resposta = pm.response.json();\r",
+                  "    pm.expect(resposta).to.be.an(\"array\");\r",
+                  "    pm.expect(resposta.length).to.be.at.least(4);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/atividades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "atividades"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Incluir atividade",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Resposta no formato JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Atividade foi incluída\", function () {\r",
+                  "    const atividade = pm.response.json();\r",
+                  "    pm.expect(atividade.id).to.equal(5);\r",
+                  "    pm.expect(atividade.descricao).to.equal(\r",
+                  "        \"Revisar documentos periciais\"\r",
+                  "    );\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"id\": 5,\r\n  \"descricao\": \"Revisar documentos periciais\",\r\n  \"prazo\": \"2026-09-15\",\r\n  \"horasEstimadas\": 3.5,\r\n  \"concluida\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/atividades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "atividades"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Alterar atividade",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Resposta no formato JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Atividade foi alterada\", function () {\r",
+                  "    const atividade = pm.response.json();\r",
+                  "    pm.expect(atividade.id).to.equal(5);\r",
+                  "    pm.expect(atividade.descricao).to.equal(\r",
+                  "        \"Revisar e classificar documentos periciais\"\r",
+                  "    );\r",
+                  "    pm.expect(atividade.horasEstimadas).to.equal(4);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"id\": 5,\r\n  \"descricao\": \"Revisar e classificar documentos periciais\",\r\n  \"prazo\": \"2026-09-18\",\r\n  \"horasEstimadas\": 4.0,\r\n  \"concluida\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/atividades/5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "atividades",
+                "5"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Excluir atividade",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 204 No Content\", function () {\r",
+                  "    pm.response.to.have.status(204);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Resposta sem conteúdo\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.equal(\"\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/atividades/5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "atividades",
+                "5"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Erros",
+      "item": [
+        {
+          "name": "Buscar atividade excluída - 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 404 Not Found\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Erro retornado em JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Mensagem informa entidade não encontrada\", function () {\r",
+                  "    const erro = pm.response.json();\r",
+                  "    pm.expect(erro.status).to.equal(404);\r",
+                  "    pm.expect(erro.mensagem).to.include(\r",
+                  "        \"Entidade não encontrada: 5\"\r",
+                  "    );\r",
+                  "    pm.expect(erro.caminho).to.equal(\"/api/atividades/5\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/atividades/5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "atividades",
+                "5"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Incluir atividade inválida - 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 400 Bad Request\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Erro retornado em JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Mensagem informa dado inválido\", function () {\r",
+                  "    const erro = pm.response.json();\r",
+                  "    pm.expect(erro.status).to.equal(400);\r",
+                  "    pm.expect(erro.mensagem).to.include(\r",
+                  "        \"A descrição da atividade é obrigatória\"\r",
+                  "    );\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"id\": 6,\r\n  \"descricao\": \"\",\r\n  \"prazo\": \"2026-09-20\",\r\n  \"horasEstimadas\": 2.0,\r\n  \"concluida\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/atividades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "atividades"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Incluir atividade duplicada - 409",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 409 Conflict\", function () {\r",
+                  "    pm.response.to.have.status(409);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Erro retornado em JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Mensagem informa identificador duplicado\", function () {\r",
+                  "    const erro = pm.response.json();\r",
+                  "    pm.expect(erro.status).to.equal(409);\r",
+                  "    pm.expect(erro.mensagem).to.include(\r",
+                  "        \"Já existe uma entidade com o ID 1\"\r",
+                  "    );\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"id\": 1,\r\n  \"descricao\": \"Atividade com identificador repetido\",\r\n  \"prazo\": \"2026-09-20\",\r\n  \"horasEstimadas\": 2.0,\r\n  \"concluida\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/atividades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "atividades"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    }
+  ]
+}

@@ -1,0 +1,847 @@
+{
+  "info": {
+    "_postman_id": "andre-gaspar-api-etapa-4",
+    "name": "André Gaspar API — Etapa 4",
+    "description": "Coleção de demonstração da API de gestão de perícias. Contempla persistência JPA, consultas personalizadas, validação, OpenAPI e integração externa com a BrasilAPI.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "peritoId",
+      "value": ""
+    },
+    {
+      "key": "nomeacaoId",
+      "value": ""
+    },
+    {
+      "key": "atividadeId",
+      "value": ""
+    },
+    {
+      "key": "tempPeritoId",
+      "value": ""
+    },
+    {
+      "key": "tempNomeacaoId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1 — Documentação",
+      "item": [
+        {
+          "name": "Consultar contrato OpenAPI",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.test(\"Título correto\", function () {",
+                  "    pm.expect(dados.info.title)",
+                  "        .to.eql(\"André Gaspar API\");",
+                  "});",
+                  "pm.test(\"Endpoint de feriados documentado\", function () {",
+                  "    pm.expect(dados.paths)",
+                  "        .to.have.property(\"/api/feriados/{ano}\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v3/api-docs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 — Peritos",
+      "item": [
+        {
+          "name": "Listar peritos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.test(\"Existe perito cadastrado\", function () {",
+                  "    pm.expect(dados.length).to.be.above(0);",
+                  "});",
+                  "pm.collectionVariables.set(\"peritoId\", dados[0].id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/peritos"
+          }
+        },
+        {
+          "name": "Obter perito por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.test(\"ID do perito corresponde\", function () {",
+                  "    pm.expect(Number(dados.id)).to.eql(",
+                  "        Number(pm.collectionVariables.get(\"peritoId\"))",
+                  "    );",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/peritos/{{peritoId}}"
+          }
+        },
+        {
+          "name": "Criar perito temporário",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/peritos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Perito Temporario Postman\",\n  \"email\": \"perito.postman@exemplo.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.collectionVariables.set(\"tempPeritoId\", dados.id);",
+                  "pm.test(\"Perito temporário criado\", function () {",
+                  "    pm.expect(dados.email).to.eql(\"perito.postman@exemplo.com\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Alterar perito temporário",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/peritos/{{tempPeritoId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{tempPeritoId}},\n  \"nome\": \"Perito Temporario Atualizado\",\n  \"email\": \"perito.postman@exemplo.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.test(\"Nome do perito foi alterado\", function () {",
+                  "    pm.expect(dados.nome).to.eql(\"Perito Temporario Atualizado\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obter perito temporário alterado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/peritos/{{tempPeritoId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.test(\"ID corresponde ao perito temporário\", function () {",
+                  "    pm.expect(Number(dados.id)).to.eql(",
+                  "        Number(pm.collectionVariables.get(\"tempPeritoId\"))",
+                  "    );",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3 — Nomeações",
+      "item": [
+        {
+          "name": "Listar nomeações",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/nomeacoes"
+          }
+        },
+        {
+          "name": "Buscar nomeação pelo número do processo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.collectionVariables.set(\"nomeacaoId\", dados.id);",
+                  "pm.test(\"Processo corresponde\", function () {",
+                  "    pm.expect(dados.numeroProcesso).to.eql(",
+                  "        \"0000001-00.2026.8.00.0001\"",
+                  "    );",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/nomeacoes/processo?numeroProcesso=0000001-00.2026.8.00.0001"
+          }
+        },
+        {
+          "name": "Filtrar nomeações recebidas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/nomeacoes/status/RECEBIDA"
+          }
+        },
+        {
+          "name": "Ordenar nomeações por prazo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.test(\"Retornou lista ordenável\", function () {",
+                  "    pm.expect(dados).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/nomeacoes/ordenadas-por-prazo"
+          }
+        },
+        {
+          "name": "Criar nomeação temporária",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/nomeacoes?peritoId={{tempPeritoId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroProcesso\": \"9999999-99.2026.8.99.9999\",\n  \"dataNomeacao\": \"2026-08-31\",\n  \"prazoEmDias\": 15,\n  \"status\": \"RECEBIDA\",\n  \"honorarios\": {\n    \"valorProposto\": 2500.00,\n    \"valorFixado\": 0.00,\n    \"valorRecebido\": 0.00,\n    \"depositado\": false\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.collectionVariables.set(\"tempNomeacaoId\", dados.id);",
+                  "pm.test(\"Nomeação temporária criada\", function () {",
+                  "    pm.expect(dados.numeroProcesso)",
+                  "        .to.eql(\"9999999-99.2026.8.99.9999\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Alterar nomeação temporária",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/nomeacoes/{{tempNomeacaoId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{tempNomeacaoId}},\n  \"numeroProcesso\": \"9999999-99.2026.8.99.9999\",\n  \"dataNomeacao\": \"2026-08-31\",\n  \"prazoEmDias\": 20,\n  \"status\": \"EM_ANDAMENTO\",\n  \"honorarios\": {\n    \"valorProposto\": 2500.00,\n    \"valorFixado\": 2400.00,\n    \"valorRecebido\": 0.00,\n    \"depositado\": true\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.test(\"Nomeação foi alterada\", function () {",
+                  "    pm.expect(dados.prazoEmDias).to.eql(20);",
+                  "    pm.expect(dados.status).to.eql(\"EM_ANDAMENTO\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obter nomeação temporária",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/nomeacoes/{{tempNomeacaoId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.test(\"ID da nomeação corresponde\", function () {",
+                  "    pm.expect(Number(dados.id)).to.eql(",
+                  "        Number(pm.collectionVariables.get(\"tempNomeacaoId\"))",
+                  "    );",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Excluir nomeação temporária",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/nomeacoes/{{tempNomeacaoId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Confirmar exclusão da nomeação temporária",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/nomeacoes/{{tempNomeacaoId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.test(\"Erro padronizado\", function () {",
+                  "    pm.expect(dados.status).to.eql(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4 — Atividades",
+      "item": [
+        {
+          "name": "Listar atividades",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/atividades"
+          }
+        },
+        {
+          "name": "Filtrar atividades pendentes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/atividades/filtro?concluida=false"
+          }
+        },
+        {
+          "name": "Criar atividade",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.collectionVariables.set(\"atividadeId\", dados.id);",
+                  "pm.test(\"Atividade criada\", function () {",
+                  "    pm.expect(dados.descricao).to.eql(",
+                  "        \"Conferir documentos pelo Postman\"",
+                  "    );",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/atividades?nomeacaoId={{nomeacaoId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Conferir documentos pelo Postman\",\n  \"prazo\": \"2026-10-20\",\n  \"horasEstimadas\": 3.0,\n  \"concluida\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Alterar atividade",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.test(\"Atividade alterada\", function () {",
+                  "    pm.expect(dados.horasEstimadas).to.eql(4);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/atividades/{{atividadeId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{atividadeId}},\n  \"descricao\": \"Conferir e organizar documentos pelo Postman\",\n  \"prazo\": \"2026-10-22\",\n  \"horasEstimadas\": 4.0,\n  \"concluida\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Obter atividade alterada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"ID corresponde à atividade\", function () {",
+                  "    pm.expect(Number(json.id)).to.eql(",
+                  "        Number(pm.collectionVariables.get(\"atividadeId\"))",
+                  "    );",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/atividades/{{atividadeId}}"
+          }
+        },
+        {
+          "name": "Excluir atividade",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/atividades/{{atividadeId}}"
+          }
+        },
+        {
+          "name": "Confirmar exclusão da atividade",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.test(\"Erro padronizado\", function () {",
+                  "    pm.expect(dados.status).to.eql(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/atividades/{{atividadeId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5 — Validação",
+      "item": [
+        {
+          "name": "Rejeitar atividade sem descrição",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.test(\"Resposta de validação padronizada\", function () {",
+                  "    pm.expect(dados.status).to.eql(400);",
+                  "    pm.expect(dados.mensagem).to.eql(",
+                  "        \"A descrição da atividade é obrigatória\"",
+                  "    );",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/atividades?nomeacaoId={{nomeacaoId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prazo\": \"2026-10-20\",\n  \"horasEstimadas\": 3.0,\n  \"concluida\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6 — Integração externa",
+      "item": [
+        {
+          "name": "Consultar feriados nacionais de 2026",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.test(\"Retornou feriados\", function () {",
+                  "    pm.expect(dados).to.be.an(\"array\");",
+                  "    pm.expect(dados.length).to.be.above(0);",
+                  "});",
+                  "pm.test(\"Retornou Tiradentes\", function () {",
+                  "    pm.expect(dados.some(function (feriado) {",
+                  "        return feriado.name === \"Tiradentes\";",
+                  "    })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/feriados/2026"
+          }
+        },
+        {
+          "name": "Rejeitar ano inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/feriados/1800"
+          }
+        }
+      ]
+    },
+    {
+      "name": "7 — Limpeza",
+      "item": [
+        {
+          "name": "Excluir perito temporário",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/peritos/{{tempPeritoId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Confirmar exclusão do perito temporário",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/peritos/{{tempPeritoId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "const dados = pm.response.json();",
+                  "pm.test(\"Erro padronizado\", function () {",
+                  "    pm.expect(dados.status).to.eql(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

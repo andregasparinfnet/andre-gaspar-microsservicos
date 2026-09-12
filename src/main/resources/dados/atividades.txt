@@ -1,0 +1,5 @@
+id;nomeacaoId;descricao;prazo;horasEstimadas;concluida
+1;1;Peticionar aceite e proposta de honorarios;2026-08-25;2.0;true
+2;1;Solicitar documentos para a pericia;2026-09-01;1.5;false
+3;1;Elaborar o laudo pericial;2026-09-30;20.0;false
+4;2;Responder a intimacao da nomeacao;2026-09-04;1.0;false
