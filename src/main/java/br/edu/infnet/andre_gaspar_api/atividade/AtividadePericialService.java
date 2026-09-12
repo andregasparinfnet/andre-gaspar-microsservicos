@@ -1,8 +1,8 @@
 package br.edu.infnet.andre_gaspar_api.atividade;
-import br.edu.infnet.andre_gaspar_api.service.BaseCrudService;
+import br.edu.infnet.andre_gaspar_api.shared.BaseCrudService;
 import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericialService;
 
-import br.edu.infnet.andre_gaspar_api.exception.DadosInvalidosException;
+import br.edu.infnet.andre_gaspar_api.shared.DadosInvalidosException;
 import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericial;
 import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
 import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericialRepository;

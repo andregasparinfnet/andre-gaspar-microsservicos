@@ -2,7 +2,7 @@ package br.edu.infnet.andre_gaspar_api.nomeacao;
 
 import br.edu.infnet.andre_gaspar_api.nomeacao.StatusNomeacao;
 
-import br.edu.infnet.andre_gaspar_api.exception.DadosInvalidosException;
+import br.edu.infnet.andre_gaspar_api.shared.DadosInvalidosException;
 import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
 import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericialService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,4 +1,4 @@
-package br.edu.infnet.andre_gaspar_api.dto;
+package br.edu.infnet.andre_gaspar_api.calendario;
 
 public record FeriadoNacional(
         String date,

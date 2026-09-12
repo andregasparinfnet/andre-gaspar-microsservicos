@@ -1,4 +1,4 @@
-package br.edu.infnet.andre_gaspar_api.model;
+package br.edu.infnet.andre_gaspar_api.shared;
 
 public interface Identificavel {
 

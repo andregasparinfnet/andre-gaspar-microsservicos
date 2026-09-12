@@ -1,6 +1,6 @@
 package br.edu.infnet.andre_gaspar_api.perito;
 
-import br.edu.infnet.andre_gaspar_api.exception.DadosInvalidosException;
+import br.edu.infnet.andre_gaspar_api.shared.DadosInvalidosException;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.BufferedReader;

@@ -1,4 +1,4 @@
-package br.edu.infnet.andre_gaspar_api.service;
+package br.edu.infnet.andre_gaspar_api.shared;
 
 import java.util.List;
 

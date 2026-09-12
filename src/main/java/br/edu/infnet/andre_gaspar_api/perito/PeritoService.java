@@ -1,8 +1,8 @@
 package br.edu.infnet.andre_gaspar_api.perito;
 
-import br.edu.infnet.andre_gaspar_api.exception.DadosInvalidosException;
-import br.edu.infnet.andre_gaspar_api.exception.EntidadeJaExistenteException;
-import br.edu.infnet.andre_gaspar_api.service.BaseCrudService;
+import br.edu.infnet.andre_gaspar_api.shared.DadosInvalidosException;
+import br.edu.infnet.andre_gaspar_api.shared.EntidadeJaExistenteException;
+import br.edu.infnet.andre_gaspar_api.shared.BaseCrudService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

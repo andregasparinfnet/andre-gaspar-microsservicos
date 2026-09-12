@@ -1,6 +1,6 @@
 package br.edu.infnet.andre_gaspar_api.nomeacao;
 import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericial;
-import br.edu.infnet.andre_gaspar_api.model.Identificavel;
+import br.edu.infnet.andre_gaspar_api.shared.Identificavel;
 
 import br.edu.infnet.andre_gaspar_api.nomeacao.StatusNomeacao;
 import br.edu.infnet.andre_gaspar_api.perito.Perito;

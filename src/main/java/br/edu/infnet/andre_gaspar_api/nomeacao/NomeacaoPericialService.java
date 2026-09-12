@@ -1,10 +1,10 @@
 package br.edu.infnet.andre_gaspar_api.nomeacao;
-import br.edu.infnet.andre_gaspar_api.service.BaseCrudService;
+import br.edu.infnet.andre_gaspar_api.shared.BaseCrudService;
 
 import br.edu.infnet.andre_gaspar_api.nomeacao.StatusNomeacao;
-import br.edu.infnet.andre_gaspar_api.exception.DadosInvalidosException;
-import br.edu.infnet.andre_gaspar_api.exception.EntidadeJaExistenteException;
-import br.edu.infnet.andre_gaspar_api.exception.EntidadeNaoEncontradaException;
+import br.edu.infnet.andre_gaspar_api.shared.DadosInvalidosException;
+import br.edu.infnet.andre_gaspar_api.shared.EntidadeJaExistenteException;
+import br.edu.infnet.andre_gaspar_api.shared.EntidadeNaoEncontradaException;
 import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
 import br.edu.infnet.andre_gaspar_api.perito.Perito;
 import br.edu.infnet.andre_gaspar_api.perito.PeritoService;

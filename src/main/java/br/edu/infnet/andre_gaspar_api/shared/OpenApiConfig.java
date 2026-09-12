@@ -1,4 +1,4 @@
-package br.edu.infnet.andre_gaspar_api.config;
+package br.edu.infnet.andre_gaspar_api.shared;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;

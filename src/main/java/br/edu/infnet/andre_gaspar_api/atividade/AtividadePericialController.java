@@ -1,6 +1,6 @@
 package br.edu.infnet.andre_gaspar_api.atividade;
 
-import br.edu.infnet.andre_gaspar_api.exception.DadosInvalidosException;
+import br.edu.infnet.andre_gaspar_api.shared.DadosInvalidosException;
 import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericial;
 import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericialService;
 import io.swagger.v3.oas.annotations.Operation;

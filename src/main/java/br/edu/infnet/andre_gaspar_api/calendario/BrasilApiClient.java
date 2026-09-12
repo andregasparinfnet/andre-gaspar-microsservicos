@@ -1,6 +1,6 @@
-package br.edu.infnet.andre_gaspar_api.client;
+package br.edu.infnet.andre_gaspar_api.calendario;
 
-import br.edu.infnet.andre_gaspar_api.dto.FeriadoNacional;
+import br.edu.infnet.andre_gaspar_api.calendario.FeriadoNacional;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

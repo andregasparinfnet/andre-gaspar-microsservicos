@@ -1,7 +1,7 @@
-package br.edu.infnet.andre_gaspar_api.controller;
+package br.edu.infnet.andre_gaspar_api.calendario;
 
-import br.edu.infnet.andre_gaspar_api.dto.FeriadoNacional;
-import br.edu.infnet.andre_gaspar_api.service.FeriadoNacionalService;
+import br.edu.infnet.andre_gaspar_api.calendario.FeriadoNacional;
+import br.edu.infnet.andre_gaspar_api.calendario.FeriadoNacionalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;

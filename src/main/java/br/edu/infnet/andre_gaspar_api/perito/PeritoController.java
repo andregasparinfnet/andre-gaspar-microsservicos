@@ -1,6 +1,6 @@
 package br.edu.infnet.andre_gaspar_api.perito;
 
-import br.edu.infnet.andre_gaspar_api.exception.DadosInvalidosException;
+import br.edu.infnet.andre_gaspar_api.shared.DadosInvalidosException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

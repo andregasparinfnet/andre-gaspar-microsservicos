@@ -1,4 +1,4 @@
-package br.edu.infnet.andre_gaspar_api.exception;
+package br.edu.infnet.andre_gaspar_api.shared;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;

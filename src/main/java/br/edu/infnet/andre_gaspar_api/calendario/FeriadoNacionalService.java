@@ -1,7 +1,7 @@
-package br.edu.infnet.andre_gaspar_api.service;
+package br.edu.infnet.andre_gaspar_api.calendario;
 
-import br.edu.infnet.andre_gaspar_api.client.BrasilApiClient;
-import br.edu.infnet.andre_gaspar_api.dto.FeriadoNacional;
+import br.edu.infnet.andre_gaspar_api.calendario.BrasilApiClient;
+import br.edu.infnet.andre_gaspar_api.calendario.FeriadoNacional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;

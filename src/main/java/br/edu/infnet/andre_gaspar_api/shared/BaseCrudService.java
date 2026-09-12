@@ -1,8 +1,8 @@
-package br.edu.infnet.andre_gaspar_api.service;
+package br.edu.infnet.andre_gaspar_api.shared;
 
-import br.edu.infnet.andre_gaspar_api.exception.DadosInvalidosException;
-import br.edu.infnet.andre_gaspar_api.exception.EntidadeNaoEncontradaException;
-import br.edu.infnet.andre_gaspar_api.model.Identificavel;
+import br.edu.infnet.andre_gaspar_api.shared.DadosInvalidosException;
+import br.edu.infnet.andre_gaspar_api.shared.EntidadeNaoEncontradaException;
+import br.edu.infnet.andre_gaspar_api.shared.Identificavel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
