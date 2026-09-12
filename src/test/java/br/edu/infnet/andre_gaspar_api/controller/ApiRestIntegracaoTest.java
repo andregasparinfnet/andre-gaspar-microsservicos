@@ -387,7 +387,7 @@ class ApiRestIntegracaoTest {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.info.title")
-                        .value("André Gaspar API"))
+                        .value("Sistema de Gestão de Perícias"))
                 .andExpect(jsonPath("$.info.version")
                         .value("0.4.0"))
                 .andExpect(jsonPath("$.paths['/api/peritos'].get")

@@ -12,12 +12,12 @@ public class OpenApiConfig {
     public OpenAPI configurarOpenApi() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("André Gaspar API")
+                        .title("Sistema de Gestão de Perícias")
                         .version("0.4.0")
                         .description(
                                 "API REST acadêmica para gerenciamento "
                                         + "de nomeações e atividades periciais. "
-                                        + "Na Etapa 4, os dados são persistidos "
+                                        + "A aplicação utiliza persistência "
                                         + "em banco H2 com Spring Data JPA."
                         )
                 );

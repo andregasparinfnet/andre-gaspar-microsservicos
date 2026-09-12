@@ -47,7 +47,7 @@ public class InicializadorAplicacao implements CommandLineRunner {
         System.out.println();
         System.out.println("========================================");
         System.out.println("  SISTEMA DE GESTAO DE PERICIAS");
-        System.out.println("  ETAPA 4 - SPRING DATA JPA");
+        System.out.println("  ETAPA 1 - ORGANIZAÇÃO ARQUITETURAL");
         System.out.println("========================================");
 
         for (Perito perito : peritos) {
