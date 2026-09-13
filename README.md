@@ -209,6 +209,64 @@ OpenFeign
     ↓
 BrasilAPI
 ```
+## Evolução realizada na Aula 2
+
+Na Aula 2, foi analisada a comunicação entre os módulos internos da aplicação.
+
+A dependência entre nomeações e peritos respeita as responsabilidades de cada módulo:
+
+```text
+NomeacaoPericialController
+    ↓
+NomeacaoPericialService
+    ↓
+PeritoService
+    ↓
+PeritoRepository
+
+```
+
+O `NomeacaoPericialService` não acessa diretamente o `PeritoRepository`. O repository permanece como detalhe interno do módulo responsável pelos peritos.
+
+Também foram introduzidos DTOs de resposta para controlar os dados transportados pela API:
+
+- `NomeacaoResumoResponse`;
+- `PeritoResumoResponse`.
+
+O `PeritoResumoResponse` está localizado no contexto de nomeação porque representa somente a visão de perito necessária para compor a resposta desse módulo.
+
+O endpoint abaixo demonstra esse contrato:
+
+```http
+GET /api/nomeacoes/resumos
+```
+
+A resposta contém informações resumidas da nomeação e do perito responsável, sem expor automaticamente honorários, atividades ou a coleção de nomeações mantida pela entidade `Perito`.
+
+Exemplo:
+
+```json
+[
+  {
+    "id": 1,
+    "numeroProcesso": "0000001-00.2026.8.00.0001",
+    "dataNomeacao": "2026-08-20",
+    "dataLimite": "2026-08-25",
+    "prazoEmDias": 5,
+    "status": "ACEITA",
+    "perito": {
+      "id": 1,
+      "nome": "Perito Academico",
+      "email": "perito@exemplo.com"
+    }
+  }
+]
+```
+
+Nesta aula, a aplicação continua sendo um monólito modular executado na mesma JVM, porta e processo. Ainda não existe comunicação de rede entre os módulos.
+
+A chamada interna entre `NomeacaoPericialService` e `PeritoService` será substituída por uma comunicação HTTP somente quando o serviço de peritos for extraído na Aula 3.
+
 
 ## Candidato a serviço independente
 
@@ -536,16 +594,17 @@ Dessa forma, os dados de peritos, nomeações e atividades podem ser retornados 
 
 ### Nomeações
 
-| Método | Endpoint                                          | Finalidade                |
-| ------ | ------------------------------------------------- | ------------------------- |
-| GET    | `/api/nomeacoes`                                  | Listar todas as nomeações |
-| GET    | `/api/nomeacoes/{id}`                             | Consultar uma nomeação    |
-| POST   | `/api/nomeacoes?peritoId={id}`                    | Incluir uma nomeação      |
-| PUT    | `/api/nomeacoes/{id}`                             | Alterar uma nomeação      |
-| DELETE | `/api/nomeacoes/{id}`                             | Excluir uma nomeação      |
-| GET    | `/api/nomeacoes/status/{status}`                  | Filtrar por status        |
-| GET    | `/api/nomeacoes/ordenadas-por-prazo`              | Ordenar pelo prazo        |
-| GET    | `/api/nomeacoes/processo?numeroProcesso={numero}` | Buscar pelo processo      |
+| Método | Endpoint                                          | Finalidade                                   |
+|--------|---------------------------------------------------|----------------------------------------------|
+| GET    | `/api/nomeacoes`                                  | Listar todas as nomeações                    |
+| GET    | `/api/nomeacoes/{id}`                             | Consultar uma nomeação                       |
+| POST   | `/api/nomeacoes?peritoId={id}`                    | Incluir uma nomeação                         |
+| PUT    | `/api/nomeacoes/{id}`                             | Alterar uma nomeação                         |
+| DELETE | `/api/nomeacoes/{id}`                             | Excluir uma nomeação                         |
+| GET    | `/api/nomeacoes/status/{status}`                  | Filtrar por status                           |
+| GET    | `/api/nomeacoes/ordenadas-por-prazo`              | Ordenar pelo prazo                           |
+| GET    | `/api/nomeacoes/processo?numeroProcesso={numero}` | Buscar pelo processo                         |
+| GET    | `/api/nomeacoes/resumos`                          | Listar nomeações utilizando DTOs de resposta |
 
 ### Atividades
 
@@ -655,7 +714,7 @@ Para executar todos os testes:
 Resultado verificado na Etapa 1:
 
 ```text
-Tests run: 17
+Tests run: 18
 Failures: 0
 Errors: 0
 Skipped: 0
@@ -727,7 +786,7 @@ A evolução será preservada no histórico do Git por meio das seguintes tags:
 * `etapa-3`: configuração e execução cloud native;
 * `etapa-4`: comunicação assíncrona e processamento em lote.
 
-A tag `etapa-1` será criada quando a organização arquitetural estiver concluída e validada.
+A tag `etapa-1` representa a aplicação organizada e validada antes da separação do primeiro serviço independente.
 
 ## Histórico de origem
 
