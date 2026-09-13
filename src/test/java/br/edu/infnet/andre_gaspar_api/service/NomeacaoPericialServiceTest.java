@@ -1,11 +1,13 @@
 package br.edu.infnet.andre_gaspar_api.service;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericialService;
 
-import br.edu.infnet.andre_gaspar_api.enums.StatusNomeacao;
-import br.edu.infnet.andre_gaspar_api.exception.EntidadeJaExistenteException;
-import br.edu.infnet.andre_gaspar_api.exception.EntidadeNaoEncontradaException;
-import br.edu.infnet.andre_gaspar_api.model.HonorariosPericiais;
-import br.edu.infnet.andre_gaspar_api.model.NomeacaoPericial;
-import br.edu.infnet.andre_gaspar_api.model.Perito;
+import br.edu.infnet.andre_gaspar_api.nomeacao.StatusNomeacao;
+import br.edu.infnet.andre_gaspar_api.shared.EntidadeJaExistenteException;
+import br.edu.infnet.andre_gaspar_api.shared.EntidadeNaoEncontradaException;
+import br.edu.infnet.andre_gaspar_api.nomeacao.HonorariosPericiais;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
+import br.edu.infnet.andre_gaspar_api.perito.Perito;
+import br.edu.infnet.andre_gaspar_api.perito.PeritoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

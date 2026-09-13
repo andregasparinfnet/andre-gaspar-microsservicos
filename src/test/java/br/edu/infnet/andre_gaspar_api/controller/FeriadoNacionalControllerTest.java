@@ -1,7 +1,8 @@
 package br.edu.infnet.andre_gaspar_api.controller;
+import br.edu.infnet.andre_gaspar_api.calendario.FeriadoNacionalController;
 
-import br.edu.infnet.andre_gaspar_api.client.BrasilApiClient;
-import br.edu.infnet.andre_gaspar_api.dto.FeriadoNacional;
+import br.edu.infnet.andre_gaspar_api.calendario.BrasilApiClient;
+import br.edu.infnet.andre_gaspar_api.calendario.FeriadoNacional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

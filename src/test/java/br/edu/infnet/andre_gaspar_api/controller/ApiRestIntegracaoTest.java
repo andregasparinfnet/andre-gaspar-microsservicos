@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import br.edu.infnet.andre_gaspar_api.service.NomeacaoPericialService;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericialService;
 import com.jayway.jsonpath.JsonPath;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -387,7 +387,7 @@ class ApiRestIntegracaoTest {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.info.title")
-                        .value("André Gaspar API"))
+                        .value("Sistema de Gestão de Perícias"))
                 .andExpect(jsonPath("$.info.version")
                         .value("0.4.0"))
                 .andExpect(jsonPath("$.paths['/api/peritos'].get")
