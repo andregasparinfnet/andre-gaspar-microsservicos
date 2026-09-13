@@ -383,6 +383,38 @@ class ApiRestIntegracaoTest {
     }
 
     @Test
+    void deveListarNomeacoesComContratoDtoResumido()
+            throws Exception {
+
+        mockMvc.perform(get("/api/nomeacoes/resumos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].id").isNumber())
+                .andExpect(jsonPath("$[0].numeroProcesso")
+                        .value("0000001-00.2026.8.00.0001"))
+                .andExpect(jsonPath("$[0].dataNomeacao")
+                        .value("2026-08-20"))
+                .andExpect(jsonPath("$[0].dataLimite")
+                        .value("2026-08-25"))
+                .andExpect(jsonPath("$[0].prazoEmDias")
+                        .value(5))
+                .andExpect(jsonPath("$[0].status")
+                        .value("ACEITA"))
+                .andExpect(jsonPath("$[0].perito.id")
+                        .isNumber())
+                .andExpect(jsonPath("$[0].perito.nome")
+                        .value("Perito Academico"))
+                .andExpect(jsonPath("$[0].perito.email")
+                        .value("perito@exemplo.com"))
+                .andExpect(jsonPath("$[0].perito.nomeacoes")
+                        .doesNotExist())
+                .andExpect(jsonPath("$[0].honorarios")
+                        .doesNotExist())
+                .andExpect(jsonPath("$[0].atividades")
+                        .doesNotExist());
+    }
+
+    @Test
     void deveDisponibilizarDocumentacaoOpenApi() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
@@ -402,6 +434,9 @@ class ApiRestIntegracaoTest {
                 ).exists())
                 .andExpect(jsonPath(
                         "$.paths['/api/nomeacoes/processo'].get"
+                ).exists())
+                .andExpect(jsonPath(
+                        "$.paths['/api/nomeacoes/resumos'].get"
                 ).exists())
                 .andExpect(jsonPath(
                         "$.paths['/api/atividades/filtro'].get"
