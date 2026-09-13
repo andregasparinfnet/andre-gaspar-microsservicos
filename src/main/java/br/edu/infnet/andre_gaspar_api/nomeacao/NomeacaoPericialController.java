@@ -1,6 +1,7 @@
 package br.edu.infnet.andre_gaspar_api.nomeacao;
 
 import br.edu.infnet.andre_gaspar_api.nomeacao.StatusNomeacao;
+import br.edu.infnet.andre_gaspar_api.nomeacao.dto.NomeacaoResumoResponse;
 
 import br.edu.infnet.andre_gaspar_api.shared.DadosInvalidosException;
 import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
@@ -112,6 +113,22 @@ public class NomeacaoPericialController {
                 nomeacaoService.obterPorNumeroProcesso(
                         numeroProcesso
                 )
+        );
+    }
+
+    @GetMapping("/resumos")
+    @Operation(
+            summary = "Lista nomeações utilizando DTOs de resposta",
+            description = "Retorna somente os dados necessários da nomeação "
+                    + "e uma visão resumida do perito responsável"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Resumos das nomeações obtidos com sucesso"
+    )
+    public ResponseEntity<List<NomeacaoResumoResponse>> listarResumos() {
+        return ResponseEntity.ok(
+                nomeacaoService.listarResumos()
         );
     }
 

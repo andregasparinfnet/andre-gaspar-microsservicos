@@ -1,5 +1,6 @@
 package br.edu.infnet.andre_gaspar_api.nomeacao;
 import br.edu.infnet.andre_gaspar_api.shared.BaseCrudService;
+import br.edu.infnet.andre_gaspar_api.nomeacao.dto.NomeacaoResumoResponse;
 
 import br.edu.infnet.andre_gaspar_api.nomeacao.StatusNomeacao;
 import br.edu.infnet.andre_gaspar_api.shared.DadosInvalidosException;
@@ -28,6 +29,14 @@ public class NomeacaoPericialService
         super(nomeacaoRepository);
         this.nomeacaoRepository = nomeacaoRepository;
         this.peritoService = peritoService;
+    }
+
+    @Transactional(readOnly = true)
+    public List<NomeacaoResumoResponse> listarResumos() {
+        return listarTodos()
+                .stream()
+                .map(NomeacaoResumoResponse::de)
+                .toList();
     }
 
     @Override
