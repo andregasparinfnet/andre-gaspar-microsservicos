@@ -3,8 +3,6 @@ import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericial;
 import br.edu.infnet.andre_gaspar_api.shared.Identificavel;
 
 import br.edu.infnet.andre_gaspar_api.nomeacao.StatusNomeacao;
-import br.edu.infnet.andre_gaspar_api.perito.Perito;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -12,12 +10,9 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -79,10 +74,8 @@ public class NomeacaoPericial implements Identificavel {
     @Embedded
     private HonorariosPericiais honorarios;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "perito_id", nullable = false)
-    private Perito perito;
+    @Column(name = "perito_id", nullable = false)
+    private Long peritoId;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @OneToMany(
@@ -160,12 +153,12 @@ public class NomeacaoPericial implements Identificavel {
         return Collections.unmodifiableList(atividades);
     }
 
-    public Perito getPerito() {
-        return perito;
+    public Long getPeritoId() {
+        return peritoId;
     }
 
-    public void associarPerito(Perito perito) {
-        this.perito = perito;
+    public void setPeritoId(Long peritoId) {
+        this.peritoId = peritoId;
     }
 
     public void atualizarDados(NomeacaoPericial dados) {
@@ -174,6 +167,7 @@ public class NomeacaoPericial implements Identificavel {
         this.prazoEmDias = dados.prazoEmDias;
         this.status = dados.status;
         this.honorarios = dados.honorarios;
+        this.peritoId = dados.peritoId;
         recalcularDataLimite();
     }
 

@@ -1,11 +1,9 @@
 package br.edu.infnet.andre_gaspar_api.loader;
 
 import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericial;
-import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
-import br.edu.infnet.andre_gaspar_api.perito.Perito;
 import br.edu.infnet.andre_gaspar_api.atividade.AtividadePericialService;
+import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
 import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericialService;
-import br.edu.infnet.andre_gaspar_api.perito.PeritoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,33 +19,21 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class LoaderIntegracaoTest {
 
     @Autowired
-    private PeritoService peritoService;
-
-    @Autowired
     private NomeacaoPericialService nomeacaoService;
 
     @Autowired
     private AtividadePericialService atividadeService;
 
     @Test
-    void deveCarregarArquivosNoBancoEPreservarRelacionamentos() {
-        List<Perito> peritos =
-                peritoService.listarTodos();
-
+    void deveCarregarArquivosEPreservarReferenciasPorId() {
         List<NomeacaoPericial> nomeacoes =
                 nomeacaoService.listarTodos();
 
         List<AtividadePericial> atividades =
                 atividadeService.listarTodos();
 
-        assertEquals(1, peritos.size());
         assertEquals(2, nomeacoes.size());
         assertEquals(4, atividades.size());
-
-        Perito perito = peritos.getFirst();
-
-        assertNotNull(perito.getId());
-        assertEquals(2, perito.getNomeacoes().size());
 
         NomeacaoPericial primeiraNomeacao =
                 nomeacaoService.obterPorNumeroProcesso(
@@ -59,27 +45,16 @@ class LoaderIntegracaoTest {
                         "0000002-00.2026.8.00.0002"
                 );
 
-        assertNotNull(primeiraNomeacao.getPerito());
-        assertEquals(
-                perito.getId(),
-                primeiraNomeacao.getPerito().getId()
-        );
+        assertEquals(1L, primeiraNomeacao.getPeritoId());
+        assertEquals(1L, segundaNomeacao.getPeritoId());
 
-        assertEquals(
-                3,
-                primeiraNomeacao.getAtividades().size()
-        );
-
-        assertEquals(
-                1,
-                segundaNomeacao.getAtividades().size()
-        );
+        assertEquals(3, primeiraNomeacao.getAtividades().size());
+        assertEquals(1, segundaNomeacao.getAtividades().size());
 
         AtividadePericial primeiraAtividade =
                 primeiraNomeacao.getAtividades().getFirst();
 
         assertNotNull(primeiraAtividade.getNomeacao());
-
         assertEquals(
                 primeiraNomeacao.getId(),
                 primeiraAtividade.getNomeacao().getId()

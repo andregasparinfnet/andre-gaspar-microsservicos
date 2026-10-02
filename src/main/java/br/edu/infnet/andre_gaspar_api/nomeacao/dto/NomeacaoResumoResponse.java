@@ -12,7 +12,7 @@ public record NomeacaoResumoResponse(
         LocalDate dataLimite,
         int prazoEmDias,
         StatusNomeacao status,
-        PeritoResumoResponse perito
+        Long peritoId
 ) {
 
     public static NomeacaoResumoResponse de(
@@ -25,7 +25,7 @@ public record NomeacaoResumoResponse(
                 nomeacao.getDataLimite(),
                 nomeacao.getPrazoEmDias(),
                 nomeacao.getStatus(),
-                PeritoResumoResponse.de(nomeacao.getPerito())
+                nomeacao.getPeritoId()
         );
     }
 }
