@@ -6,8 +6,6 @@ import br.edu.infnet.andre_gaspar_api.shared.BaseCrudService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 public class PeritoService extends BaseCrudService<Perito> {
 
@@ -67,30 +65,6 @@ public class PeritoService extends BaseCrudService<Perito> {
         );
 
         return peritoRepository.save(peritoPersistido);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Perito obterPorId(Long id) {
-        Perito perito = super.obterPorId(id);
-        inicializarRelacionamentos(perito);
-        return perito;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<Perito> listarTodos() {
-        List<Perito> peritos = super.listarTodos();
-
-        peritos.forEach(this::inicializarRelacionamentos);
-
-        return peritos;
-    }
-
-    private void inicializarRelacionamentos(Perito perito) {
-        perito.getNomeacoes().forEach(nomeacao ->
-                nomeacao.getAtividades().size()
-        );
     }
 
     @Override

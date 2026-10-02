@@ -6,11 +6,13 @@ import br.edu.infnet.andre_gaspar_api.shared.EntidadeJaExistenteException;
 import br.edu.infnet.andre_gaspar_api.shared.EntidadeNaoEncontradaException;
 import br.edu.infnet.andre_gaspar_api.nomeacao.HonorariosPericiais;
 import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
-import br.edu.infnet.andre_gaspar_api.perito.Perito;
-import br.edu.infnet.andre_gaspar_api.perito.PeritoService;
+import br.edu.infnet.andre_gaspar_api.nomeacao.client.PeritoClient;
+import br.edu.infnet.andre_gaspar_api.nomeacao.dto.PeritoResumoResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -21,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Transactional
@@ -29,8 +32,18 @@ class NomeacaoPericialServiceTest {
     @Autowired
     private NomeacaoPericialService service;
 
-    @Autowired
-    private PeritoService peritoService;
+    @MockitoBean
+    private PeritoClient peritoClient;
+
+    @BeforeEach
+    void prepararRespostaDoServicoDePeritos() {
+        when(peritoClient.obterPorId(1L))
+                .thenReturn(new PeritoResumoResponse(
+                        1L,
+                        "Perito Academico",
+                        "perito@exemplo.com"
+                ));
+    }
 
     @Test
     void deveIncluirEObterNomeacaoPorId() {
@@ -212,10 +225,7 @@ class NomeacaoPericialServiceTest {
                         honorarios
                 );
 
-        Perito perito =
-                peritoService.listarTodos().getFirst();
-
-        nomeacao.associarPerito(perito);
+        nomeacao.setPeritoId(1L);
         nomeacao.alterarStatus(status);
         return nomeacao;
     }
@@ -240,9 +250,7 @@ class NomeacaoPericialServiceTest {
                         honorarios
                 );
 
-        Perito perito =
-                peritoService.listarTodos().getFirst();
-        nomeacao.associarPerito(perito);
+        nomeacao.setPeritoId(1L);
         nomeacao.alterarStatus(status);
         return nomeacao;
     }

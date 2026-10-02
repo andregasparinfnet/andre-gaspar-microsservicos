@@ -4,8 +4,6 @@ import br.edu.infnet.andre_gaspar_api.nomeacao.StatusNomeacao;
 import br.edu.infnet.andre_gaspar_api.shared.DadosInvalidosException;
 import br.edu.infnet.andre_gaspar_api.nomeacao.HonorariosPericiais;
 import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
-import br.edu.infnet.andre_gaspar_api.perito.Perito;
-import br.edu.infnet.andre_gaspar_api.perito.PeritoLoader;
 import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericialService;
 import org.springframework.core.io.ClassPathResource;
 
@@ -25,7 +23,6 @@ public class NomeacaoLoader {
             nomeacoesPorIdOrigem = new HashMap<>();
 
     public List<NomeacaoPericial> carregar(
-            PeritoLoader peritoLoader,
             NomeacaoPericialService nomeacaoService
     ) throws IOException {
 
@@ -103,19 +100,10 @@ public class NomeacaoLoader {
 
                 nomeacao.alterarStatus(status);
 
-                Perito perito =
-                        peritoLoader.obterPorIdOrigem(
-                                peritoIdOrigem
-                        );
-
-                nomeacao.associarPerito(perito);
+                nomeacao.setPeritoId(peritoIdOrigem);
 
                 NomeacaoPericial nomeacaoPersistida =
                         nomeacaoService.incluir(nomeacao);
-
-                perito.adicionarNomeacao(
-                        nomeacaoPersistida
-                );
 
                 nomeacoesPorIdOrigem.put(
                         idOrigem,

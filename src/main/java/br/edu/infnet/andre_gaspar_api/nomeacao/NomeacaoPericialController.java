@@ -169,6 +169,14 @@ public class NomeacaoPericialController {
             @ApiResponse(
                     responseCode = "409",
                     description = "Já existe uma nomeação para o processo"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Perito não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "503",
+                    description = "Serviço de peritos indisponível"
             )
     })
     public ResponseEntity<NomeacaoPericial> incluir(
@@ -203,7 +211,11 @@ public class NomeacaoPericialController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Nomeação não encontrada"
+                    description = "Nomeação ou perito não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "503",
+                    description = "Serviço de peritos indisponível"
             )
     })
     public ResponseEntity<NomeacaoPericial> alterar(

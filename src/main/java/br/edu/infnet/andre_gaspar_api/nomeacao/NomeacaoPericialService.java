@@ -7,9 +7,12 @@ import br.edu.infnet.andre_gaspar_api.shared.DadosInvalidosException;
 import br.edu.infnet.andre_gaspar_api.shared.EntidadeJaExistenteException;
 import br.edu.infnet.andre_gaspar_api.shared.EntidadeNaoEncontradaException;
 import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericial;
-import br.edu.infnet.andre_gaspar_api.perito.Perito;
-import br.edu.infnet.andre_gaspar_api.perito.PeritoService;
 import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericialRepository;
+import br.edu.infnet.andre_gaspar_api.nomeacao.client.PeritoClient;
+import br.edu.infnet.andre_gaspar_api.nomeacao.dto.PeritoResumoResponse;
+import feign.FeignException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,15 +23,15 @@ public class NomeacaoPericialService
         extends BaseCrudService<NomeacaoPericial> {
 
     private final NomeacaoPericialRepository nomeacaoRepository;
-    private final PeritoService peritoService;
+    private final PeritoClient peritoClient;
 
     public NomeacaoPericialService(
             NomeacaoPericialRepository nomeacaoRepository,
-            PeritoService peritoService
+            PeritoClient peritoClient
     ) {
         super(nomeacaoRepository);
         this.nomeacaoRepository = nomeacaoRepository;
-        this.peritoService = peritoService;
+        this.peritoClient = peritoClient;
     }
 
     @Transactional(readOnly = true)
@@ -64,8 +67,8 @@ public class NomeacaoPericialService
             Long peritoId,
             NomeacaoPericial nomeacao
     ) {
-        Perito perito = peritoService.obterPorId(peritoId);
-        nomeacao.associarPerito(perito);
+        validarPeritoRemoto(peritoId);
+        nomeacao.setPeritoId(peritoId);
 
         return incluir(nomeacao);
     }
@@ -96,6 +99,13 @@ public class NomeacaoPericialService
                             + dadosAtualizados.getNumeroProcesso()
             );
         }
+
+        Long peritoIdEfetivo = dadosAtualizados.getPeritoId() == null
+                ? nomeacaoPersistida.getPeritoId()
+                : dadosAtualizados.getPeritoId();
+
+        validarPeritoRemoto(peritoIdEfetivo);
+        dadosAtualizados.setPeritoId(peritoIdEfetivo);
 
         nomeacaoPersistida.atualizarDados(
                 dadosAtualizados
@@ -197,6 +207,35 @@ public class NomeacaoPericialService
         nomeacao.getAtividades().size();
     }
 
+    private void validarPeritoRemoto(Long peritoId) {
+        if (peritoId == null) {
+            throw new DadosInvalidosException(
+                    "O identificador do perito é obrigatório"
+            );
+        }
+
+        try {
+            PeritoResumoResponse perito =
+                    peritoClient.obterPorId(peritoId);
+
+            if (perito == null || perito.id() == null) {
+                throw new ResponseStatusException(
+                        HttpStatus.SERVICE_UNAVAILABLE,
+                        "Serviço de peritos temporariamente indisponível"
+                );
+            }
+        } catch (FeignException.NotFound excecao) {
+            throw new EntidadeNaoEncontradaException(
+                    "Perito não encontrado: " + peritoId
+            );
+        } catch (FeignException excecao) {
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Serviço de peritos temporariamente indisponível"
+            );
+        }
+    }
+
     @Override
     protected void validarDadosEspecificos(
             NomeacaoPericial nomeacao
@@ -238,9 +277,9 @@ public class NomeacaoPericialService
             );
         }
 
-        if (nomeacao.getPerito() == null) {
+        if (nomeacao.getPeritoId() == null) {
             throw new DadosInvalidosException(
-                    "O perito da nomeação é obrigatório"
+                    "O identificador do perito é obrigatório"
             );
         }
     }

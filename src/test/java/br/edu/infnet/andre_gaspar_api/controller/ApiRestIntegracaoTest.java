@@ -1,11 +1,15 @@
 package br.edu.infnet.andre_gaspar_api.controller;
 
+import br.edu.infnet.andre_gaspar_api.nomeacao.client.PeritoClient;
+import br.edu.infnet.andre_gaspar_api.nomeacao.dto.PeritoResumoResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import br.edu.infnet.andre_gaspar_api.nomeacao.NomeacaoPericialService;
 import com.jayway.jsonpath.JsonPath;
 
@@ -15,6 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -26,12 +31,21 @@ class ApiRestIntegracaoTest {
     @Autowired
     private NomeacaoPericialService nomeacaoService;
 
+    @MockitoBean
+    private PeritoClient peritoClient;
+
+    @BeforeEach
+    void prepararRespostaDoServicoDePeritos() {
+        when(peritoClient.obterPorId(1L))
+                .thenReturn(new PeritoResumoResponse(
+                        1L,
+                        "Perito Academico",
+                        "perito@exemplo.com"
+                ));
+    }
+
     @Test
     void deveListarOsTresContextosDeNegocio() throws Exception {
-        mockMvc.perform(get("/api/peritos"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").isNumber());
-
         mockMvc.perform(get("/api/nomeacoes"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").isNumber());
@@ -132,14 +146,14 @@ class ApiRestIntegracaoTest {
 
     @Test
     void devePadronizarRespostasDeErro() throws Exception {
-        mockMvc.perform(get("/api/peritos/999"))
+        mockMvc.perform(get("/api/nomeacoes/999999"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.erro").value("Not Found"))
                 .andExpect(jsonPath("$.mensagem")
-                        .value("Entidade não encontrada: 999"))
+                        .value("Entidade não encontrada: 999999"))
                 .andExpect(jsonPath("$.caminho")
-                        .value("/api/peritos/999"));
+                        .value("/api/nomeacoes/999999"));
 
         mockMvc.perform(get("/api/atividades/0"))
                 .andExpect(status().isBadRequest())
@@ -183,41 +197,6 @@ class ApiRestIntegracaoTest {
     }
 
     @Test
-    void deveAplicarValidacaoERejeitarIdNaInclusaoDePerito()
-            throws Exception {
-
-        String peritoInvalido = """
-            {
-              "nome": "",
-              "email": "email-invalido"
-            }
-            """;
-
-        mockMvc.perform(post("/api/peritos")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(peritoInvalido))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
-
-        String peritoComId = """
-            {
-              "id": 999,
-              "nome": "Perito com identificador",
-              "email": "perito.id@exemplo.com"
-            }
-            """;
-
-        mockMvc.perform(post("/api/peritos")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(peritoComId))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.mensagem")
-                        .value(
-                                "O ID não deve ser informado na inclusão"
-                        ));
-    }
-
-    @Test
     void devePreservarRelacionamentosAoAlterarNomeacao()
             throws Exception {
 
@@ -226,8 +205,7 @@ class ApiRestIntegracaoTest {
                         .obterPorNumeroProcesso(
                                 "0000001-00.2026.8.00.0001"
                         )
-                        .getPerito()
-                        .getId();
+                        .getPeritoId();
 
         String nomeacaoNova = """
             {
@@ -322,6 +300,8 @@ class ApiRestIntegracaoTest {
                         .value("2026-11-16"))
                 .andExpect(jsonPath("$.status")
                         .value("ACEITA"))
+                .andExpect(jsonPath("$.peritoId")
+                        .value(peritoId))
                 .andExpect(jsonPath("$.atividades.length()")
                         .value(1))
                 .andExpect(jsonPath("$.atividades[0].id")
@@ -400,14 +380,8 @@ class ApiRestIntegracaoTest {
                         .value(5))
                 .andExpect(jsonPath("$[0].status")
                         .value("ACEITA"))
-                .andExpect(jsonPath("$[0].perito.id")
-                        .isNumber())
-                .andExpect(jsonPath("$[0].perito.nome")
-                        .value("Perito Academico"))
-                .andExpect(jsonPath("$[0].perito.email")
-                        .value("perito@exemplo.com"))
-                .andExpect(jsonPath("$[0].perito.nomeacoes")
-                        .doesNotExist())
+                .andExpect(jsonPath("$[0].peritoId")
+                        .value(1))
                 .andExpect(jsonPath("$[0].honorarios")
                         .doesNotExist())
                 .andExpect(jsonPath("$[0].atividades")
@@ -422,8 +396,6 @@ class ApiRestIntegracaoTest {
                         .value("Sistema de Gestão de Perícias"))
                 .andExpect(jsonPath("$.info.version")
                         .value("0.4.0"))
-                .andExpect(jsonPath("$.paths['/api/peritos'].get")
-                        .exists())
                 .andExpect(jsonPath("$.paths['/api/nomeacoes'].get")
                         .exists())
                 .andExpect(jsonPath(
