@@ -1,6 +1,8 @@
 package br.edu.infnet.andre_gaspar_api.perito;
 
 import br.edu.infnet.andre_gaspar_api.shared.DadosInvalidosException;
+import br.edu.infnet.andre_gaspar_api.perito.dto.PeritoResponse;
+import br.edu.infnet.andre_gaspar_api.perito.dto.PeritoRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,8 +42,12 @@ public class PeritoController {
             responseCode = "200",
             description = "Lista de peritos obtida com sucesso"
     )
-    public ResponseEntity<List<Perito>> listarTodos() {
-        return ResponseEntity.ok(peritoService.listarTodos());
+    public ResponseEntity<List<PeritoResponse>> listarTodos() {
+        return ResponseEntity.ok(
+                peritoService.listarTodos().stream()
+                        .map(PeritoResponse::de)
+                        .toList()
+        );
     }
 
     @GetMapping("/{id}")
@@ -60,11 +66,13 @@ public class PeritoController {
                     description = "Perito não encontrado"
             )
     })
-    public ResponseEntity<Perito> obterPorId(
+    public ResponseEntity<PeritoResponse> obterPorId(
             @Parameter(description = "Identificador do perito")
             @PathVariable Long id
     ) {
-        return ResponseEntity.ok(peritoService.obterPorId(id));
+        return ResponseEntity.ok(
+                PeritoResponse.de(peritoService.obterPorId(id))
+        );
     }
 
     @PostMapping
@@ -80,17 +88,17 @@ public class PeritoController {
             ),
             @ApiResponse(
                     responseCode = "409",
-                    description = "Já existe um perito com o identificador"
+                    description = "Já existe um perito com o e-mail"
             )
     })
-    public ResponseEntity<Perito> incluir(
-            @Valid @RequestBody Perito perito
+    public ResponseEntity<PeritoResponse> incluir(
+            @Valid @RequestBody PeritoRequest perito
     ) {
-        Perito peritoIncluido = peritoService.incluir(perito);
+        Perito peritoIncluido = peritoService.incluir(perito.paraEntidade());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(peritoIncluido);
+                .body(PeritoResponse.de(peritoIncluido));
     }
 
     @PutMapping("/{id}")
@@ -109,18 +117,18 @@ public class PeritoController {
                     description = "Perito não encontrado"
             )
     })
-    public ResponseEntity<Perito> alterar(
+    public ResponseEntity<PeritoResponse> alterar(
             @Parameter(description = "Identificador do perito")
             @PathVariable Long id,
-            @Valid @RequestBody Perito perito
+            @Valid @RequestBody PeritoRequest perito
     ) {
-        if (!id.equals(perito.getId())) {
+        if (!id.equals(perito.id())) {
             throw new DadosInvalidosException(
                     "O ID da URL deve ser igual ao ID do perito"
             );
         }
 
-        return ResponseEntity.ok(peritoService.alterar(perito));
+        return ResponseEntity.ok(PeritoResponse.de(peritoService.alterar(perito.paraEntidade())));
     }
 
     @DeleteMapping("/{id}")
