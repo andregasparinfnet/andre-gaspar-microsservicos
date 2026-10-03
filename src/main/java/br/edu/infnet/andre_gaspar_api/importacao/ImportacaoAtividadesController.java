@@ -1,5 +1,8 @@
 package br.edu.infnet.andre_gaspar_api.importacao;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.UUID;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.job.Job;
@@ -29,6 +32,11 @@ public class ImportacaoAtividadesController {
     }
 
     @PostMapping
+    @Operation(summary = "Executa a importação em lote das atividades do CSV")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Resultado da execução do job"),
+            @ApiResponse(responseCode = "422", description = "Job terminou com falha")
+    })
     public ResponseEntity<ResultadoImportacao> executar() throws Exception {
         JobExecution execucao = operador.run(
                 importarAtividadesJob,

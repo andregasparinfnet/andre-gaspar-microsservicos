@@ -26,14 +26,13 @@ O cadastro de peritos, escolhido como candidato na Etapa 1, foi extraído para `
 Cliente HTTP
     ↓
 Aplicação principal (8080)
-    ├── Nomeação: Controller → Service → Repository → banco principal
-    ├── Atividade: Controller → Service → Repository → banco principal
+    ├── Nomeação e Atividade → Controller → Service → Repository → db-nomeacoes
     ├── Calendário → BrasilAPI
-    └── NomeacaoPericialService → PeritoClient (OpenFeign)
-                                  ↓ HTTP
-                             Perito Service (8081)
-                                  ↓
-                             Controller → Service → Repository → banco de peritos
+    ├── NomeacaoPericialService → PeritoClient (OpenFeign)
+    │                             ↓ HTTP
+    │                        Perito Service (8081) → db-peritos
+    ├── PublicadorAvisos → RabbitMQ → ConsumidorAvisos → db-peritos
+    └── Spring Batch → Reader → Processor → Writer → db-nomeacoes
 ```
 
 Na execução pelo Compose, cada aplicação utiliza seu próprio banco PostgreSQL. A aplicação principal não acessa o repository nem as tabelas do Perito Service. A associação é representada por `Long peritoId`, sem relacionamento JPA entre bancos. Os testes automatizados usam H2 em memória.
@@ -54,7 +53,7 @@ Consulta feriados nacionais por meio de `BrasilApiClient`, utilizando OpenFeign 
 
 ### Perito Service
 
-Mantém o cadastro dos peritos, incluindo nome e e-mail, e oferece operações de inclusão, consulta, alteração e exclusão. Possui projeto Spring Boot, API, entidade, service, repository, inicialização e banco próprios.
+Mantém o cadastro dos peritos, incluindo nome e e-mail, e oferece operações de inclusão, consulta, alteração e exclusão. Possui projeto Spring Boot, API, entidade, service, repository, inicialização e banco próprios. Na Etapa 4, também registra os avisos de nomeação recebidos pelo RabbitMQ em seu próprio banco.
 
 ## API do Perito Service
 
@@ -67,6 +66,7 @@ Base local: `http://localhost:8081`
 | `POST` | `/api/peritos` | Incluir perito |
 | `PUT` | `/api/peritos/{id}` | Alterar perito |
 | `DELETE` | `/api/peritos/{id}` | Excluir perito |
+| `GET` | `/api/peritos/{id}/avisos` | Consultar avisos recebidos |
 
 A API utiliza `PeritoRequest` e `PeritoResponse`. A aplicação principal recebe os dados remotos em `PeritoResumoResponse`; entidades JPA não são compartilhadas como contrato HTTP.
 
@@ -116,12 +116,14 @@ Base local: `http://localhost:8080`
 | `POST` | `/api/nomeacoes?peritoId={id}` | Incluir nomeação com validação remota do perito |
 | `PUT` | `/api/nomeacoes/{id}` | Alterar nomeação |
 | `DELETE` | `/api/nomeacoes/{id}` | Excluir nomeação |
+| `POST` | `/api/nomeacoes/{id}/avisos` | Publicar aviso assíncrono |
 | `GET` | `/api/nomeacoes/status/{status}` | Filtrar por status |
 | `GET` | `/api/nomeacoes/ordenadas-por-prazo` | Ordenar pelo prazo |
 | `GET` | `/api/nomeacoes/processo?numeroProcesso={numero}` | Buscar pelo processo |
 | `GET` | `/api/nomeacoes/resumos` | Obter resumos com `peritoId` |
 | `GET` | `/api/atividades` | Listar atividades |
 | `POST` | `/api/atividades?nomeacaoId={id}` | Incluir atividade |
+| `POST` | `/api/importacoes/atividades` | Executar importação CSV com Spring Batch |
 | `GET` | `/api/feriados/{ano}` | Consultar feriados |
 
 As operações restantes de consulta, alteração e exclusão de atividades também estão documentadas na API principal.
@@ -306,7 +308,28 @@ curl -i http://localhost:8080/api/atividades
 
 A resposta informa o identificador e o estado da execução, além dos itens lidos e entregues ao Writer. **`processados` não é a quantidade de novas atividades gravadas:** inclui as linhas entregues ao Writer mesmo quando seu código já existe.
 
-Na verificação com PostgreSQL, a primeira execução passou de 4 para 10 atividades. A segunda leu as seis linhas, manteve 10 atividades e recebeu outro identificador de execução. Os códigos `ET4-A01` a `ET4-A06` apareceram uma vez cada no banco e permaneceram após reiniciar a aplicação. A suíte da aplicação principal passou com 18 testes; a do Perito Service terminou sem falhas.
+Na verificação com PostgreSQL, a primeira execução passou de 4 para 10 atividades. A segunda leu as seis linhas, manteve 10 atividades e recebeu outro identificador de execução. Os códigos `ET4-A01` a `ET4-A06` apareceram uma vez cada no banco e permaneceram após reiniciar a aplicação. A suíte da aplicação principal passou com 18 testes; a do Perito Service, com 5 testes sem falhas.
+
+### Reprodução e resultados da auditoria
+
+~~~bash
+./mvnw clean test
+(cd perito-service && ./mvnw clean test)
+sudo docker compose config --quiet
+sudo docker compose up --build -d
+npx --yes newman run postman/andre-gaspar-api.postman_collection.json
+~~~
+
+| Verificação | Resultado observado |
+| --- | --- |
+| Testes Java | 18 na aplicação principal e 5 no Perito Service, sem falhas |
+| Coleção Postman executada com Newman | 4 requisições e 9 asserções, sem falhas |
+| REST e OpenFeign | Inclusão com perito existente: `201`; dados inválidos: `400`; recurso inexistente: `404`; Perito Service indisponível: `503`, mantendo a consulta local funcional |
+| RabbitMQ | Com o consumidor parado, a publicação retornou `202` e a fila reteve uma mensagem com zero consumidores; após reiniciar o serviço, o aviso foi registrado uma vez |
+| Spring Batch | Duas execuções leram e processaram seis linhas cada; os seis códigos permaneceram únicos, sem aumentar o total de atividades na segunda execução ou perdê-los após reiniciar |
+| Configuração e persistência | Perfis `dev` e `prod` consultados no Config Server; bancos PostgreSQL com tabelas separadas por serviço |
+
+A coleção Postman demonstra o fluxo básico. Os cenários de indisponibilidade, persistência e ausência de duplicações foram conferidos adicionalmente por chamadas HTTP e consultas ao RabbitMQ e aos PostgreSQL.
 
 ### Reflexão arquitetural da Etapa 4
 

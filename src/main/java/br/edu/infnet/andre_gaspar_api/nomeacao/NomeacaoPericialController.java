@@ -120,7 +120,7 @@ public class NomeacaoPericialController {
     @Operation(
             summary = "Lista nomeações utilizando DTOs de resposta",
             description = "Retorna somente os dados necessários da nomeação "
-                    + "e uma visão resumida do perito responsável"
+                    + "e o identificador do perito responsável"
     )
     @ApiResponse(
             responseCode = "200",

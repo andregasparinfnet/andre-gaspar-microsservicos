@@ -3,6 +3,8 @@
 Este histórico se refere ao repositório `andre-gaspar-microsservicos`.
 As tags acadêmicas identificam a implementação de cada etapa.
 
+Nota histórica: o `CHANGELOG.md` preservado nas tags `etapa-1`, `etapa-2` e `etapa-3` contém o histórico herdado do projeto de origem. As seções abaixo consolidam a evolução desta disciplina.
+
 ## Etapa 4 — Comunicação assíncrona e processamento em lote
 
 - RabbitMQ integrado às duas aplicações por meio de produtor, fila
