@@ -8,14 +8,15 @@ Aplicação acadêmica em Java e Spring Boot para gerenciar peritos judiciais, n
 
 ## Etapa atual
 
-**Etapa 2 — Separação e Comunicação entre Serviços**
+**Etapa 3 — Configuração e Execução dos Serviços**
 
-A solução possui duas aplicações Spring Boot independentes:
+A solução possui duas aplicações Spring Boot independentes, um Config Server e dois bancos PostgreSQL. O Docker Compose coordena a execução local:
 
 | Aplicação | Responsabilidade | Porta local |
 | --- | --- | --- |
 | Aplicação principal | Nomeações, honorários, atividades e consulta de feriados | `8080` |
 | Perito Service | Cadastro e consulta de peritos | `8081` |
+| Config Server | Configuração centralizada | `8888` |
 
 O cadastro de peritos, escolhido como candidato na Etapa 1, foi extraído para `perito-service/`. A aplicação principal conserva o identificador `peritoId` em cada nomeação e consulta o serviço de peritos via HTTP quando precisa validar esse cadastro.
 
@@ -35,7 +36,7 @@ Aplicação principal (8080)
                              Controller → Service → Repository → banco de peritos
 ```
 
-As aplicações possuem bancos H2 separados. A aplicação principal não acessa o repository nem as tabelas do Perito Service. A associação com o perito é representada por um `Long peritoId`, sem relacionamento JPA entre bancos.
+Na execução pelo Compose, cada aplicação utiliza seu próprio banco PostgreSQL. A aplicação principal não acessa o repository nem as tabelas do Perito Service. A associação é representada por `Long peritoId`, sem relacionamento JPA entre bancos. Os testes automatizados usam H2 em memória.
 
 ## Responsabilidades e dependências
 
@@ -82,11 +83,15 @@ O cliente Feign da aplicação principal consulta:
 GET /api/peritos/{id}
 ```
 
-Seu endereço é externalizado em `src/main/resources/application.properties`:
+Seu endereço é fornecido pelo Config Server conforme o profile ativo:
 
-```properties
-servicos.perito.url=${PERITO_SERVICE_URL:http://localhost:8081}
-```
+~~~properties
+# dev
+servicos.perito.url=http://localhost:8081
+
+# prod, na rede do Docker Compose
+servicos.perito.url=http://perito-service:8081
+~~~
 
 Fluxo da inclusão de uma nomeação:
 
@@ -130,39 +135,45 @@ As rotas `/api/peritos` pertencem à aplicação da porta `8081`; não existem m
 
 ## Bancos e carga inicial
 
-A aplicação principal persiste nomeações e atividades em seu banco H2. O Perito Service persiste os peritos em outro banco H2. Nenhuma aplicação consulta diretamente o banco da outra.
+A execução pelo Compose utiliza dois PostgreSQL 17: `db-nomeacoes` para nomeações e atividades, e `db-peritos` para o cadastro de peritos. Cada aplicação recebe a URL JDBC e as credenciais do próprio banco por variáveis de ambiente. Os volumes `dados-nomeacoes` e `dados-peritos` preservam os registros ao recriar os containers. Os arquivos H2 da etapa anterior não são migrados automaticamente.
 
-Os arquivos de demonstração também pertencem aos respectivos projetos:
+Os dados fictícios permanecem em `src/main/resources/dados/nomeacoes.txt` e `src/main/resources/dados/atividades.txt` na aplicação principal e em `perito-service/src/main/resources/dados/peritos.txt` no serviço de peritos. A carga inicial usa `peritoId` sem chamada remota; a validação HTTP acontece na inclusão e alteração de nomeações.
 
-- Aplicação principal: `src/main/resources/dados/nomeacoes.txt` e `atividades.txt`.
-- Perito Service: `perito-service/src/main/resources/dados/peritos.txt`.
+## Configuração externa e profiles
 
-A carga inicial da aplicação principal utiliza o identificador do perito registrado nos dados de demonstração. Seu funcionamento na inicialização não depende de uma consulta remota. A validação HTTP ocorre nas operações de inclusão e alteração de nomeações.
+As aplicações possuem `application-dev.properties` e `application-prod.properties`. O Compose seleciona `prod` por `SPRING_PROFILES_ACTIVE`. Os testes automatizados utilizam H2 em memória e desabilitam o cliente Config Server.
+
+O projeto `config-server/` usa Spring Cloud Config Server com backend `native`. Os arquivos em `config-server/src/main/resources/config/` fornecem as portas e a URL do Perito Service: `http://localhost:8081` em `dev` e `http://perito-service:8081` em `prod`. Cada cliente recebe a URL do Config Server em `CONFIG_SERVER_URL`.
+
+| Variável | Uso |
+| --- | --- |
+| `SPRING_PROFILES_ACTIVE` | Seleciona `dev` ou `prod` |
+| `CONFIG_SERVER_URL` | Endereço do Config Server |
+| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | Conexão da aplicação ao seu próprio banco |
+| `NOMEACOES_DB_PASSWORD`, `PERITOS_DB_PASSWORD` | Senhas dos bancos no Compose |
+| `BRASIL_API_URL` | Endereço da integração externa de feriados |
+
+As senhas locais ficam em `.env`, ignorado pelo Git; `.env.example` documenta os nomes das variáveis. No profile `prod`, as credenciais e URLs JDBC devem ser fornecidas externamente.
 
 ## Execução local
 
-Requisitos: Java 21 e Maven Wrapper dos projetos.
+Requisitos: Docker Engine e plugin Docker Compose. Na primeira execução, copie `.env.example` para `.env` e substitua as duas senhas de exemplo por senhas locais distintas. O arquivo `.env` é ignorado pelo Git. Depois execute na raiz do repositório:
 
-Terminal 1, serviço de peritos:
+~~~bash
+sudo docker compose config --quiet
+sudo docker compose up --build -d
+sudo docker compose ps
+~~~
 
-```bash
-cd perito-service
-./mvnw spring-boot:run
-```
+A composição inicia a aplicação principal (`8080`), o Perito Service (`8081`), o Config Server (`8888`) e os dois bancos. Ela aguarda as verificações de disponibilidade do Config Server e dos PostgreSQL. Dentro dos containers, os endereços são `config-server:8888`, `perito-service:8081`, `db-nomeacoes:5432` e `db-peritos:5432`.
 
-Terminal 2, raiz do repositório:
+Para encerrar e preservar os volumes:
 
-```bash
-./mvnw spring-boot:run
-```
+~~~bash
+sudo docker compose down
+~~~
 
-Se for necessário configurar outro endereço para o serviço:
-
-```bash
-PERITO_SERVICE_URL=http://localhost:8081 ./mvnw spring-boot:run
-```
-
-Cada projeto deve ser iniciado a partir de seu próprio diretório para utilizar a configuração e o banco H2 correspondentes.
+As portas `5433` e `5434` permitem acessar os respectivos bancos a partir do host. O profile `dev` prevê PostgreSQL nessas portas, Config Server local e `DB_PASSWORD` informado externamente quando as aplicações forem executadas com Java 21 e Maven Wrapper fora do Compose.
 
 ## Validação da comunicação
 
@@ -206,7 +217,7 @@ Para testar a indisponibilidade, interrompa somente o Perito Service, confirme q
 | Inclusão com `peritoId=999999` e serviço disponível | `404 Not Found` |
 | Inclusão com a porta `8081` indisponível | `503 Service Unavailable`, com mensagem controlada |
 
-Os cenários de rede foram executados manualmente com `curl`. As inclusões que responderam `201` permanecem no banco H2 local até serem excluídas.
+Os cenários de rede foram executados manualmente com `curl`. Na Etapa 2, essas inclusões eram armazenadas no H2 local. Na Etapa 3, a execução pelo Compose utiliza PostgreSQL.
 
 ## Testes automatizados
 
@@ -221,7 +232,7 @@ cd perito-service
 ./mvnw clean test
 ```
 
-Na verificação realizada durante esta etapa, a aplicação principal executou **17 testes sem falhas** e o Perito Service executou **4 testes sem falhas**. Os testes da aplicação principal simulam o cliente Feign quando necessário. O funcionamento com ambos os serviços ativos e a falha de comunicação foram comprovados adicionalmente por chamadas HTTP reais.
+Na verificação da Etapa 2, a aplicação principal executou **17 testes sem falhas** e o Perito Service executou **4 testes sem falhas**. Os testes da aplicação principal simulam o cliente Feign quando necessário. O funcionamento com ambos os serviços ativos e a falha de comunicação foram comprovados adicionalmente por chamadas HTTP reais.
 
 ## Reflexão arquitetural
 
@@ -235,17 +246,45 @@ Na verificação realizada durante esta etapa, a aplicação principal executou 
 
 **O serviço precisa permanecer independente?** O cadastro poderia continuar como módulo do monólito. A separação oferece autonomia de evolução, mas acrescenta dependências operacionais. Sua permanência como serviço deve considerar esses custos e as necessidades reais da solução.
 
+## Resultados observados na Etapa 3
+
+| Cenário | Resultado observado |
+| --- | --- |
+| Construção das três imagens Docker | Concluída |
+| Config Server e dois PostgreSQL | Containers saudáveis |
+| `GET /api/peritos` e `GET /api/nomeacoes` | `200 OK`, com dados iniciais |
+| Configurações `dev` e `prod` das duas aplicações | Consultadas no Config Server |
+| Inclusão de nomeação com `peritoId=1` | `201 Created` |
+| Inclusão com `peritoId=999999` | `404 Not Found` |
+| Recriação dos containers com `down` e `up` | Nomeação `ETAPA3-123708C437F4` e perito 1 preservados |
+
+As suítes automatizadas executaram 17 testes na aplicação principal e 4 no Perito Service, sem falhas. Elas usam H2 em memória. As verificações HTTP desta etapa foram feitas com os dois PostgreSQL do Compose.
+
+## Reflexão arquitetural da Etapa 3
+
+**Quais configurações podem variar entre ambientes?** Portas, endereços dos serviços e bancos, credenciais e exibição das consultas SQL.
+
+**Quais foram externalizadas?** O Config Server fornece portas e URL do Perito Service por profile. As aplicações recebem URLs JDBC, usuários e senhas por variáveis de ambiente. `SPRING_PROFILES_ACTIVE` seleciona o profile e `CONFIG_SERVER_URL` indica o servidor de configuração.
+
+**Por que um serviço não deve acessar diretamente o banco do outro?** Isso cria dependência das tabelas internas e contorna as regras do serviço responsável. Nomeações consulta peritos pela API HTTP e armazena apenas `peritoId`.
+
+**Qual problema o Docker resolve?** Permite construir e executar cada aplicação em uma imagem com ambiente Java definido, reduzindo diferenças entre instalações locais.
+
+**Qual é a função do Docker Compose?** Iniciar e conectar as três aplicações e os dois bancos com um comando, incluindo variáveis, volumes e verificações de disponibilidade.
+
+**Qual problema a configuração centralizada procura resolver?** Permite manter portas e URLs de comunicação por aplicação e profile em um ponto comum, sem alterar código Java ao mudar o ambiente. As senhas permanecem fora do Config Server deste projeto.
+
 ## Histórico das etapas
 
 A tag `etapa-1` preserva a versão anterior à separação, quando Perito, Nomeação e Atividade eram módulos da mesma aplicação Spring Boot. Nesse marco foram demonstradas a organização por domínio, as camadas Controller, Service e Repository, validação, tratamento de exceções, consultas Spring Data, OpenAPI e análise das dependências.
 
-Na Etapa 2, a chamada interna `NomeacaoPericialService → PeritoService` foi substituída por `NomeacaoPericialService → PeritoClient → HTTP → Perito Service`. A tag `etapa-2` será registrada somente após a revisão final desta etapa.
+Na Etapa 2, a chamada interna `NomeacaoPericialService → PeritoService` foi substituída por `NomeacaoPericialService → PeritoClient → HTTP → Perito Service`. A tag `etapa-2` registra essa separação.
 
-As etapas posteriores abordarão configuração Cloud Native, bancos relacionais, containers, mensageria e processamento Batch conforme o enunciado da disciplina.
+A Etapa 3 adiciona profiles, variáveis de ambiente, Config Server, PostgreSQL e Docker Compose. A tag `etapa-3` será registrada após a revisão final. Mensageria e processamento Batch pertencem à Etapa 4.
 
 ## Tecnologias
 
-Java 21, Spring Boot, Spring MVC, Spring Data JPA, H2, Bean Validation, Spring Cloud OpenFeign, Springdoc OpenAPI, Swagger UI, BrasilAPI, Maven, JUnit, MockMvc, `curl` e Git.
+Java 21, Spring Boot, Spring MVC, Spring Data JPA, PostgreSQL, H2 nos testes, Bean Validation, Spring Cloud OpenFeign, Spring Cloud Config Server, Springdoc OpenAPI, Swagger UI, BrasilAPI, Maven, JUnit, MockMvc, Docker, Docker Compose, `curl` e Git.
 
 ## Origem do projeto
 

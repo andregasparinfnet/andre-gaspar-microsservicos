@@ -1,0 +1,8 @@
+.git
+target
+data
+perito-service
+config-server
+.env
+*.mv.db
+*.trace.db
