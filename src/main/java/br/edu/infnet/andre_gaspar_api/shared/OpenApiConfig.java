@@ -17,8 +17,8 @@ public class OpenApiConfig {
                         .description(
                                 "API REST acadêmica para gerenciamento "
                                         + "de nomeações e atividades periciais. "
-                                        + "A aplicação utiliza persistência "
-                                        + "em banco H2 com Spring Data JPA."
+                                        + "A aplicação utiliza PostgreSQL em produção "
+                                        + "e H2 nos testes com Spring Data JPA."
                         )
                 );
     }

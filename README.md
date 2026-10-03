@@ -323,7 +323,7 @@ A tag `etapa-1` preserva a versão anterior à separação, quando Perito, Nomea
 
 Na Etapa 2, a chamada interna `NomeacaoPericialService → PeritoService` foi substituída por `NomeacaoPericialService → PeritoClient → HTTP → Perito Service`. A tag `etapa-2` registra essa separação.
 
-A Etapa 3 adiciona profiles, variáveis de ambiente, Config Server, PostgreSQL e Docker Compose. A tag `etapa-3` registra essa versão. A Etapa 4 acrescenta mensageria e processamento Batch; sua tag será criada após a revisão final.
+A Etapa 3 adiciona profiles, variáveis de ambiente, Config Server, PostgreSQL e Docker Compose. A tag `etapa-3` registra essa versão. A Etapa 4 acrescenta mensageria e processamento Batch. A tag `etapa-4` identifica a versão final desta etapa.
 
 ## Tecnologias
 

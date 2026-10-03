@@ -40,7 +40,7 @@ public class InicializadorAplicacao implements CommandLineRunner {
         System.out.println();
         System.out.println("========================================");
         System.out.println("  SISTEMA DE GESTAO DE PERICIAS");
-        System.out.println("  ETAPA 2 - SERVIÇO DE PERITOS");
+        System.out.println("  MICROSSERVIÇOS - ETAPA 4");
         System.out.println("========================================");
 
         for (NomeacaoPericial nomeacao : nomeacoes) {
