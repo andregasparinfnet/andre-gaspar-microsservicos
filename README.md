@@ -161,12 +161,27 @@ As senhas locais ficam em `.env`, ignorado pelo Git; `.env.example` documenta os
 
 ## Execução local
 
-Requisitos: Docker Engine e plugin Docker Compose. Na primeira execução, copie `.env.example` para `.env` e substitua as três senhas de exemplo por senhas locais distintas. O arquivo `.env` é ignorado pelo Git. Depois execute na raiz do repositório:
+Requisitos para a execução integrada: Docker Engine e plugin Docker Compose. Na primeira execução, na raiz do repositório, crie o arquivo local de credenciais e substitua as três senhas de exemplo por senhas distintas. O arquivo `.env` é ignorado pelo Git:
+
+~~~bash
+cp .env.example .env
+# Edite .env e substitua NOMEACOES_DB_PASSWORD, PERITOS_DB_PASSWORD e RABBITMQ_PASSWORD.
+~~~
+
+Inicie os serviços:
 
 ~~~bash
 sudo docker compose config --quiet
 sudo docker compose up --build -d
 sudo docker compose ps
+~~~
+
+Na primeira inicialização, aguarde o build e a subida das aplicações. Confirme as respostas antes de executar os exemplos:
+
+~~~bash
+curl -f http://localhost:8888/perito-service/prod
+curl -f http://localhost:8081/api/peritos
+curl -f http://localhost:8080/api/nomeacoes
 ~~~
 
 A composição inicia a aplicação principal (`8080`), o Perito Service (`8081`), o Config Server (`8888`), o RabbitMQ e os dois bancos. Ela aguarda as verificações de disponibilidade do Config Server e dos PostgreSQL. Dentro dos containers, os endereços são `config-server:8888`, `perito-service:8081`, `db-nomeacoes:5432` e `db-peritos:5432`.
@@ -177,7 +192,7 @@ Para encerrar e preservar os volumes:
 sudo docker compose down
 ~~~
 
-As portas `5433` e `5434` permitem acessar os respectivos bancos a partir do host. O profile `dev` prevê PostgreSQL nessas portas, Config Server local e `DB_PASSWORD` informado externamente quando as aplicações forem executadas com Java 21 e Maven Wrapper fora do Compose.
+As portas `5433` e `5434` permitem acessar os respectivos bancos a partir do host. O procedimento reproduzível deste README usa as aplicações dentro do Compose. Para executar Java 21 e Maven Wrapper no host com o profile `dev`, configure também as variáveis de banco e as credenciais RabbitMQ, mantenha o Config Server acessível em `localhost:8888` e disponibilize o protocolo AMQP do RabbitMQ em `localhost:5672`. O Compose deste projeto publica apenas a interface de gerenciamento do broker em `localhost:15672`; ela não substitui a porta AMQP. Evite iniciar no host aplicações que disputem as portas `8080` e `8081` com os containers.
 
 ## Validação da comunicação
 
@@ -189,7 +204,7 @@ curl -i http://localhost:8081/v3/api-docs
 curl -i http://localhost:8080/api/nomeacoes
 ```
 
-Exemplo de criação pela aplicação principal, usando um número de processo ainda não cadastrado:
+Exemplo de criação pela aplicação principal. Altere `numeroProcesso` em novas tentativas, pois ele deve ser único:
 
 ```bash
 curl -i -X POST 'http://localhost:8080/api/nomeacoes?peritoId=1' \
@@ -208,7 +223,7 @@ curl -i -X POST 'http://localhost:8080/api/nomeacoes?peritoId=1' \
   }'
 ```
 
-Para testar a indisponibilidade, interrompa somente o Perito Service, confirme que a porta `8081` não aceita conexões e tente incluir outra nomeação com um número de processo diferente. A aplicação principal deve responder `503` e continuar executando.
+Para testar a indisponibilidade do serviço remoto, execute `sudo docker compose stop perito-service`, confirme que a porta `8081` não aceita conexões e repita o `POST` acima com **outro** `numeroProcesso`. A aplicação principal deve responder `503` e continuar atendendo `GET /api/nomeacoes`. Termine com `sudo docker compose start perito-service`. Execute esse cenário separadamente do teste de mensageria abaixo, que também interrompe o Perito Service.
 
 ## Resultados observados na Etapa 2
 
@@ -225,7 +240,7 @@ Os cenários de rede foram executados manualmente com `curl`. Na Etapa 2, essas 
 
 ## Testes automatizados
 
-Os projetos possuem suítes Maven separadas:
+Para os testes Java, use Java 21 e os Maven Wrappers de cada projeto. Os testes usam H2 em memória e não exigem que o Compose esteja ativo:
 
 ```bash
 ./mvnw clean test
@@ -237,6 +252,8 @@ cd perito-service
 ```
 
 Na verificação da Etapa 2, a aplicação principal executou **17 testes sem falhas** e o Perito Service executou **4 testes sem falhas**. Os testes da aplicação principal simulam o cliente Feign quando necessário. O funcionamento com ambos os serviços ativos e a falha de comunicação foram comprovados adicionalmente por chamadas HTTP reais.
+
+O Config Server possui projeto Maven independente. Para verificar sua compilação e testes, execute `./mvnw -f config-server/pom.xml clean test` na raiz do repositório.
 
 ## Reflexão arquitetural
 
@@ -293,6 +310,18 @@ curl -i -X POST http://localhost:8080/api/nomeacoes/1/avisos
 curl -i http://localhost:8081/api/peritos/1/avisos
 ~~~
 
+Para observar a fila enquanto o consumidor está indisponível, use uma nomeação existente associada ao perito 1 (na carga inicial, a nomeação 1). Pare o consumidor, publique um novo aviso, confira `messages_ready` e `consumers` e reinicie o serviço:
+
+~~~bash
+sudo docker compose stop perito-service
+curl -i -X POST http://localhost:8080/api/nomeacoes/1/avisos
+sudo docker compose exec -T rabbitmq rabbitmqctl list_queues name messages_ready consumers
+sudo docker compose start perito-service
+curl -i http://localhost:8081/api/peritos/1/avisos
+~~~
+
+Na linha da fila `avisos.nomeacoes`, espere ao menos uma mensagem pronta e zero consumidores antes do reinício. Anote o `avisoId` retornado pelo `POST` e procure esse mesmo identificador na última consulta. Se algum comando falhar após o `stop`, reinicie o Perito Service antes de encerrar o teste.
+
 Também foi testada a indisponibilidade temporária do consumidor: com o Perito Service parado, a aplicação principal respondeu `202`, a fila apresentou uma mensagem pronta e nenhum consumidor; após reiniciar o serviço, o aviso foi registrado. A publicação ainda depende da disponibilidade do RabbitMQ.
 
 ### Importação de atividades com Spring Batch
@@ -303,14 +332,19 @@ O job não executa automaticamente na inicialização. A fonte pode ser indicada
 
 ~~~bash
 curl -i -X POST http://localhost:8080/api/importacoes/atividades
+curl -i -X POST http://localhost:8080/api/importacoes/atividades
 curl -i http://localhost:8080/api/atividades
 ~~~
+
+O CSV de exemplo referencia os processos `0000001-00.2026.8.00.0001` e `0000002-00.2026.8.00.0002`, presentes na carga inicial de um banco novo. Se o banco já tiver outros dados, confirme que essas duas nomeações existem antes de importar. Compare os `execucaoId` das duas respostas: devem ser diferentes, com `status=COMPLETED`, `lidos=6` e `processados=6` em cada execução. A quantidade de atividades deve aumentar apenas na primeira execução, caso os códigos `ET4-A01` a `ET4-A06` ainda não estejam cadastrados.
 
 A resposta informa o identificador e o estado da execução, além dos itens lidos e entregues ao Writer. **`processados` não é a quantidade de novas atividades gravadas:** inclui as linhas entregues ao Writer mesmo quando seu código já existe.
 
 Na verificação com PostgreSQL, a primeira execução passou de 4 para 10 atividades. A segunda leu as seis linhas, manteve 10 atividades e recebeu outro identificador de execução. Os códigos `ET4-A01` a `ET4-A06` apareceram uma vez cada no banco e permaneceram após reiniciar a aplicação. A suíte da aplicação principal passou com 18 testes; a do Perito Service, com 5 testes sem falhas.
 
 ### Reprodução e resultados da auditoria
+
+Execute a coleção Postman com Node.js e npm disponíveis; `npx` obtém o Newman se ele ainda não estiver instalado (requer acesso à rede nessa primeira utilização). Com os containers prontos, o comando abaixo executa quatro requisições e nove asserções do fluxo básico. As verificações de falha, fila e persistência descritas nas seções anteriores são testes adicionais.
 
 ~~~bash
 ./mvnw clean test
