@@ -8,6 +8,8 @@ import java.util.List;
 public interface AtividadePericialRepository
         extends JpaRepository<AtividadePericial, Long> {
 
+    boolean existsByCodigoImportacao(String codigoImportacao);
+
     List<AtividadePericial> findByConcluidaOrderByPrazoAsc(
             boolean concluida
     );

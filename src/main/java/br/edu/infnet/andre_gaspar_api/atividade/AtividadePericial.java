@@ -27,6 +27,10 @@ public class AtividadePericial implements Identificavel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
+    @Column(name = "codigo_importacao", unique = true, length = 64)
+    private String codigoImportacao;
+
     @NotBlank(message = "A descrição da atividade é obrigatória")
     @Size(
             min = 3,
@@ -79,6 +83,14 @@ public class AtividadePericial implements Identificavel {
     @Override
     public Long getId() {
         return id;
+    }
+
+    public String getCodigoImportacao() {
+        return codigoImportacao;
+    }
+
+    public void definirCodigoImportacao(String codigoImportacao) {
+        this.codigoImportacao = codigoImportacao;
     }
 
     public String getDescricao() {
