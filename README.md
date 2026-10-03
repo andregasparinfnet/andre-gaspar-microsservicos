@@ -8,9 +8,9 @@ Aplicação acadêmica em Java e Spring Boot para gerenciar peritos judiciais, n
 
 ## Etapa atual
 
-**Etapa 3 — Configuração e Execução dos Serviços**
+**Etapa 4 — Comunicação Assíncrona e Processamento em Lote**
 
-A solução possui duas aplicações Spring Boot independentes, um Config Server e dois bancos PostgreSQL. O Docker Compose coordena a execução local:
+A solução possui duas aplicações Spring Boot independentes, um Config Server, RabbitMQ e dois bancos PostgreSQL. O Docker Compose coordena a execução local:
 
 | Aplicação | Responsabilidade | Porta local |
 | --- | --- | --- |
@@ -152,12 +152,14 @@ O projeto `config-server/` usa Spring Cloud Config Server com backend `native`. 
 | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | Conexão da aplicação ao seu próprio banco |
 | `NOMEACOES_DB_PASSWORD`, `PERITOS_DB_PASSWORD` | Senhas dos bancos no Compose |
 | `BRASIL_API_URL` | Endereço da integração externa de feriados |
+| `RABBITMQ_USER`, `RABBITMQ_PASSWORD` | Credenciais locais do broker no Compose |
+| `BATCH_ATIVIDADES_ARQUIVO` | Fonte CSV da importação; usa o arquivo incluído na aplicação por padrão |
 
 As senhas locais ficam em `.env`, ignorado pelo Git; `.env.example` documenta os nomes das variáveis. No profile `prod`, as credenciais e URLs JDBC devem ser fornecidas externamente.
 
 ## Execução local
 
-Requisitos: Docker Engine e plugin Docker Compose. Na primeira execução, copie `.env.example` para `.env` e substitua as duas senhas de exemplo por senhas locais distintas. O arquivo `.env` é ignorado pelo Git. Depois execute na raiz do repositório:
+Requisitos: Docker Engine e plugin Docker Compose. Na primeira execução, copie `.env.example` para `.env` e substitua as três senhas de exemplo por senhas locais distintas. O arquivo `.env` é ignorado pelo Git. Depois execute na raiz do repositório:
 
 ~~~bash
 sudo docker compose config --quiet
@@ -165,7 +167,7 @@ sudo docker compose up --build -d
 sudo docker compose ps
 ~~~
 
-A composição inicia a aplicação principal (`8080`), o Perito Service (`8081`), o Config Server (`8888`) e os dois bancos. Ela aguarda as verificações de disponibilidade do Config Server e dos PostgreSQL. Dentro dos containers, os endereços são `config-server:8888`, `perito-service:8081`, `db-nomeacoes:5432` e `db-peritos:5432`.
+A composição inicia a aplicação principal (`8080`), o Perito Service (`8081`), o Config Server (`8888`), o RabbitMQ e os dois bancos. Ela aguarda as verificações de disponibilidade do Config Server e dos PostgreSQL. Dentro dos containers, os endereços são `config-server:8888`, `perito-service:8081`, `db-nomeacoes:5432` e `db-peritos:5432`.
 
 Para encerrar e preservar os volumes:
 
@@ -274,17 +276,58 @@ As suítes automatizadas executaram 17 testes na aplicação principal e 4 no Pe
 
 **Qual problema a configuração centralizada procura resolver?** Permite manter portas e URLs de comunicação por aplicação e profile em um ponto comum, sem alterar código Java ao mudar o ambiente. As senhas permanecem fora do Config Server deste projeto.
 
+## Comunicação assíncrona e processamento em lote (Etapa 4)
+
+### Avisos de nomeação pelo RabbitMQ
+
+`POST /api/nomeacoes/{id}/avisos` publica um aviso com `avisoId`, `nomeacaoId`, `peritoId` e `numeroProcesso`. A aplicação principal responde `202 Accepted` após a confirmação da publicação pelo broker. O Perito Service consome a mensagem e registra o aviso em seu próprio PostgreSQL; os registros podem ser consultados em `GET /api/peritos/{id}/avisos`. Esse registro representa um aviso interno, sem envio de e-mail.
+
+O aviso pode ser tratado depois porque a nomeação já está cadastrada quando a publicação é solicitada. A fila `avisos.nomeacoes` é durável e a mensagem é persistente. O consumidor identifica o aviso pelo `avisoId` para evitar duplicar seu registro se receber a mesma mensagem novamente.
+
+Para observar o fluxo com o Compose em execução:
+
+~~~bash
+curl -i -X POST http://localhost:8080/api/nomeacoes/1/avisos
+curl -i http://localhost:8081/api/peritos/1/avisos
+~~~
+
+Também foi testada a indisponibilidade temporária do consumidor: com o Perito Service parado, a aplicação principal respondeu `202`, a fila apresentou uma mensagem pronta e nenhum consumidor; após reiniciar o serviço, o aviso foi registrado. A publicação ainda depende da disponibilidade do RabbitMQ.
+
+### Importação de atividades com Spring Batch
+
+`POST /api/importacoes/atividades` inicia o job `importarAtividadesCsv`. Seu `ItemReader` lê as seis linhas de `src/main/resources/dados/atividades-importacao.csv`. O `ItemProcessor` normaliza e valida os campos. O `ItemWriter` encontra a nomeação pelo número do processo e grava a atividade no banco da aplicação principal. O Step processa chunks de cinco registros.
+
+O job não executa automaticamente na inicialização. A fonte pode ser indicada por `BATCH_ATIVIDADES_ARQUIVO`; por padrão, usa o CSV incluído na aplicação. Cada atividade importada recebe um `codigo_importacao` único. Uma nova execução lê o arquivo novamente e ignora os códigos já cadastrados, sem duplicar as atividades.
+
+~~~bash
+curl -i -X POST http://localhost:8080/api/importacoes/atividades
+curl -i http://localhost:8080/api/atividades
+~~~
+
+A resposta informa o identificador e o estado da execução, além dos itens lidos e entregues ao Writer. **`processados` não é a quantidade de novas atividades gravadas:** inclui as linhas entregues ao Writer mesmo quando seu código já existe.
+
+Na verificação com PostgreSQL, a primeira execução passou de 4 para 10 atividades. A segunda leu as seis linhas, manteve 10 atividades e recebeu outro identificador de execução. Os códigos `ET4-A01` a `ET4-A06` apareceram uma vez cada no banco e permaneceram após reiniciar a aplicação. A suíte da aplicação principal passou com 18 testes; a do Perito Service terminou sem falhas.
+
+### Reflexão arquitetural da Etapa 4
+
+1. **Operação assíncrona:** registrar no Perito Service o aviso de uma nomeação cadastrada.
+2. **Por que pode esperar:** o registro do aviso não precisa terminar durante a requisição de publicação.
+3. **Consumidor indisponível:** com o broker ativo, a mensagem aguarda na fila durável até o consumidor voltar.
+4. **Operação em lote:** importar atividades periciais de um CSV para nomeações existentes.
+5. **Por que usar Batch:** há vários registros a ler, validar e gravar em chunks, com identificação de cada execução.
+6. **Quando usar cada abordagem:** REST para consultar e validar o perito com resposta imediata; mensageria para registrar avisos sem esperar o consumidor; Batch para processar o conjunto de atividades do arquivo.
+
 ## Histórico das etapas
 
 A tag `etapa-1` preserva a versão anterior à separação, quando Perito, Nomeação e Atividade eram módulos da mesma aplicação Spring Boot. Nesse marco foram demonstradas a organização por domínio, as camadas Controller, Service e Repository, validação, tratamento de exceções, consultas Spring Data, OpenAPI e análise das dependências.
 
 Na Etapa 2, a chamada interna `NomeacaoPericialService → PeritoService` foi substituída por `NomeacaoPericialService → PeritoClient → HTTP → Perito Service`. A tag `etapa-2` registra essa separação.
 
-A Etapa 3 adiciona profiles, variáveis de ambiente, Config Server, PostgreSQL e Docker Compose. A tag `etapa-3` será registrada após a revisão final. Mensageria e processamento Batch pertencem à Etapa 4.
+A Etapa 3 adiciona profiles, variáveis de ambiente, Config Server, PostgreSQL e Docker Compose. A tag `etapa-3` registra essa versão. A Etapa 4 acrescenta mensageria e processamento Batch; sua tag será criada após a revisão final.
 
 ## Tecnologias
 
-Java 21, Spring Boot, Spring MVC, Spring Data JPA, PostgreSQL, H2 nos testes, Bean Validation, Spring Cloud OpenFeign, Spring Cloud Config Server, Springdoc OpenAPI, Swagger UI, BrasilAPI, Maven, JUnit, MockMvc, Docker, Docker Compose, `curl` e Git.
+Java 21, Spring Boot, Spring MVC, Spring Data JPA, PostgreSQL, H2 nos testes, Bean Validation, Spring Cloud OpenFeign, Spring Cloud Config Server, Spring AMQP, RabbitMQ, Spring Batch, Springdoc OpenAPI, Swagger UI, BrasilAPI, Maven, JUnit, MockMvc, Docker, Docker Compose, `curl` e Git.
 
 ## Origem do projeto
 

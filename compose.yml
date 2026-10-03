@@ -43,6 +43,22 @@ services:
       timeout: 3s
       retries: 20
 
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?Defina RABBITMQ_USER no arquivo .env}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?Defina RABBITMQ_PASSWORD no arquivo .env}
+    ports:
+      - "127.0.0.1:15672:15672"
+    volumes:
+      - dados-rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
   perito-service:
     build:
       context: ./perito-service
@@ -52,12 +68,17 @@ services:
       DB_URL: jdbc:postgresql://db-peritos:5432/peritos
       DB_USERNAME: peritos
       DB_PASSWORD: ${PERITOS_DB_PASSWORD:?Defina PERITOS_DB_PASSWORD no arquivo .env}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:?Defina RABBITMQ_USER no arquivo .env}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?Defina RABBITMQ_PASSWORD no arquivo .env}
     ports:
       - "8081:8081"
     depends_on:
       config-server:
         condition: service_healthy
       db-peritos:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   aplicacao-principal:
@@ -69,6 +90,9 @@ services:
       DB_URL: jdbc:postgresql://db-nomeacoes:5432/nomeacoes
       DB_USERNAME: nomeacoes
       DB_PASSWORD: ${NOMEACOES_DB_PASSWORD:?Defina NOMEACOES_DB_PASSWORD no arquivo .env}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:?Defina RABBITMQ_USER no arquivo .env}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?Defina RABBITMQ_PASSWORD no arquivo .env}
     ports:
       - "8080:8080"
     depends_on:
@@ -76,9 +100,12 @@ services:
         condition: service_healthy
       db-nomeacoes:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
       perito-service:
         condition: service_started
 
 volumes:
   dados-nomeacoes:
   dados-peritos:
+  dados-rabbitmq:
