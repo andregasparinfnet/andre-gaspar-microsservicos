@@ -34,3 +34,6 @@ build/
 
 ### Banco H2 local ###
 data/
+
+# Credenciais locais do Docker Compose
+.env
